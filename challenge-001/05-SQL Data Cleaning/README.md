@@ -1,5 +1,7 @@
 # SQL Data Cleaning
 
+- Learn how to perform data cleaning using SQL
+
 ## Cleaning with String Functions
 
 - `customer_data` table
