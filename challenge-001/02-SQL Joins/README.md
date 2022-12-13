@@ -3,6 +3,26 @@
 - Learn to write INNER JOINS to combine data from multiple tables
 - Learn to write LEFT JOINs to combine data from multiple tables
 
+## Inner Join
+
+![](images/1.png)
+
+## Outer Join
+
+![](images/2.png)
+![](images/3.png)
+![](images/4.png)
+![](images/5.png)
+![](images/6.png)
+![](images/7.png)
+
+## Examples
+
+![](images/8.png)
+![](images/9.png)
+![](images/10.png)
+![](images/11.png)
+
 ## Introduction to JOINs
 
 ## Why Not Store Everything in One Table
