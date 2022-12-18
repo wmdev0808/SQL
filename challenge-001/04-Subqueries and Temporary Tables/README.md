@@ -1,5 +1,15 @@
 # SQL Subqueries and Temporary Tables
 
+- Topics
+
+  1. Subqueries
+  2. Table Expressions
+  3. Persistent Derived Tables
+
+- Both `subqueries` and `table expressions` are methods for being able to write a query that creates a table, and then write a query that interacts with this newly created table. Sometimes the question you are trying to answer doesn't have an answer when working directly with existing tables in database.
+
+- However, if we were able to create new tables from the existing tables, we know we could query these new tables to answer our question. This is where the queries of this lesson come to the rescue.
+
 ## Introduction to Subqueries
 
 - Allow you to answer more complex questions than you can with a single database table
@@ -10,7 +20,11 @@
     - We'd like to know which channels send the most traffic per day on average to Patch and Posey.
     - In order to do that, we'll need to aggregate events by channel by day, then we need to take those and average them.
 
+- Whenever we need to use existing tables to create a new table that we then want to query again, this is an indication that we will need to use some sort of `subquery`.
+
 ## Your First Subquery
+
+- We want to find the average number of events for each day for each channel. The first table will provide us the number of events for each day and channel, and then we will need to average these values together using a second query.
 
 ```
 SELECT  channel,
@@ -38,6 +52,64 @@ ORDER BY 2 DESC
 | twitter  | 1.3166666666666667 |
 | banner   | 1.2899728997289973 |
 
+## Subquery Formatting
+
+- When writing Subqueries, it is easy for your query to look incredibly complex. In order to assist your reader, which is often just yourself at a future date, formatting SQL will help with understanding your code.
+
+- The important thing to remember when using subqueries is to provide some way for the reader to easily determine which parts of the query will be executed together. Most people do this by indenting the subquery in some way.
+
+### Badly Formatted Queries
+
+- Though these poorly formatted examples will execute the same way as the well formatted examples, they just aren't very friendly for understanding what is happening!
+
+- Here is the first, where it is impossible to decipher what is going on:
+
+  ```
+  SELECT * FROM (SELECT DATE_TRUNC('day',occurred_at) AS day, channel, COUNT(*) as events FROM web_events GROUP BY 1,2 ORDER BY 3 DESC) sub;
+  ```
+
+- This second version, which includes some helpful line breaks, is easier to read than that previous version, but it is still not as easy to read as the queries in the **Well Formatted Query** section.
+
+  ```
+  SELECT *
+  FROM (
+  SELECT DATE_TRUNC('day',occurred_at) AS day,
+  channel, COUNT(*) as events
+  FROM web_events
+  GROUP BY 1,2
+  ORDER BY 3 DESC) sub;
+  ```
+
+### Well Formatted Query
+
+- Now for a well formatted example, you can see the table we are pulling from much easier than in the previous queries.
+
+  ```
+  SELECT *
+  FROM (SELECT DATE_TRUNC('day',occurred_at) AS day,
+                  channel, COUNT(*) as events
+        FROM web_events
+        GROUP BY 1,2
+        ORDER BY 3 DESC) sub;
+  ```
+
+- Additionally, if we have a `GROUP BY`, `ORDER BY`, `WHERE`, `HAVING`, or any other statement following our subquery, we would then indent it at the same level as our outer query.
+
+- The query below is similar to the above, but it is applying additional statements to the outer query, so you can see there are `GROUP BY` and `ORDER BY` statements used on the output are not tabbed. The inner query `GROUP BY` and `ORDER BY` statements are indented to match the inner table.
+
+  ```
+  SELECT *
+  FROM (SELECT DATE_TRUNC('day',occurred_at) AS day,
+                  channel, COUNT(*) as events
+        FROM web_events
+        GROUP BY 1,2
+        ORDER BY 3 DESC) sub
+  GROUP BY day, channel, events
+  ORDER BY 2 DESC;
+  ```
+
+- These final two queries are so much easier to read!
+
 ## Subqueries Part II
 
 - Subqueries can be used in several places within a query.
@@ -54,6 +126,12 @@ ORDER BY 2 DESC
           FROM demo.orders)
       ORDER BY occurred_at
     ```
+
+- Expert Tip
+
+  - Note that you should not include an alias when you write a subquery in a conditional statement. This is because the subquery is treated as an individual value (or set of values in the `IN` case) rather than as a table.
+
+  - Also, notice the query here compared a single value. If we returned an entire column `IN` would need to be used to perform a logical argument. If we are returning an entire table, then we must use an `ALIAS` for the table, and perform additional logic on the entire table.
 
 ## SQL Subquery
 
