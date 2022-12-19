@@ -5,7 +5,80 @@
 - we're going to cover more advanced joints and learn how to make queries that run quickly even over giant data sets.
 - Most of the work in this lesson is about covering edge cases.
 
+## FULL OUTER JOIN
+
+### INNER JOIN
+
+- In earlier lessons, we covered inner joins, which produce results for which the join condition is matched in both tables.
+
+- _Venn diagrams, which are helpful for visualizing table joins, are provided below along with sample queries. Consider the circle on the left Table A and the circle on the right Table B_.
+
+  ![](images/inner-join.png)
+
+  ```
+  SELECT column_name(s)
+  FROM Table_A
+  INNER JOIN Table_B ON Table_A.column_name = Table_B.column_name;
+  ```
+
+### LEFT JOIN
+
+- Left joins also include unmatched rows from the left table, which is indicated in the “FROM” clause.
+
+  ![](images/left-join.png)
+
+  ```
+  SELECT column_name(s)
+  FROM Table_A
+  LEFT JOIN Table_B ON Table_A.column_name = Table_B.column_name;
+  ```
+
+### RIGHT JOIN
+
+- Right joins are similar to left joins, but include unmatched data from the right table -- the one that’s indicated in the JOIN clause.
+
+  ![](images/right-join.png)
+
+  ```
+  SELECT column_name(s)
+  FROM Table_A
+  RIGHT JOIN Table_B ON Table_A.column_name = Table_B.column_name;
+  ```
+
+### FULL OUTER JOIN
+
+- In some cases, you might want to include unmatched rows from both tables being joined. You can do this with a full outer join.
+
+  ![](images/full-outer-join.png)
+
+  ```
+  SELECT column_name(s)
+  FROM Table_A
+  FULL OUTER JOIN Table_B ON Table_A.column_name = Table_B.column_name;
+  ```
+
+- A common application of this is when joining two tables on a timestamp. Let’s say you’ve got one table containing the number of item 1 sold each day, and another containing the number of item 2 sold. If a certain date, like January 1, 2018, exists in the left table but not the right, while another date, like January 2, 2018, exists in the right table but not the left:
+
+  - a left join would drop the row with January 2, 2018 from the result set
+  - a right join would drop January 1, 2018 from the result set
+
+- The only way to make sure both January 1, 2018 and January 2, 2018 make it into the results is to do a full outer join. A full outer join returns unmatched records in each table with null values for the columns that came from the opposite table.
+
+### FULL OUTER JOIN with WHERE A.Key IS NULL OR B.Key IS NULL
+
+- If you wanted to return unmatched rows only, which is useful for some cases of data assessment, you can isolate them by adding the following line to the end of the query:
+
+  ```
+  WHERE Table_A.column_name IS NULL OR Table_B.column_name IS NULL
+  ```
+
+  ![](images/full-outer-join-if-null.png)
+
 ## JOINs with Comparison Operators Motivation
+
+- Expert Tip
+
+  - If you recall from earlier lessons on joins, the join clause is evaluated before the where clause -- filtering in the join clause will eliminate rows before they are joined, while filtering in the WHERE clause will leave those rows in and produce some nulls.
 
 - So far, we've only performed joins by exactly matching values from one table to another.
 - There are plenty of cases where you might not want to join this way, though.
@@ -90,6 +163,31 @@
   | 6     | 1001          | 2016-03-02 15:29:32 | 4311  | 1001          | 2016-03-02 15:40:29 |
 
   ...
+
+## Appending Data via UNION
+
+### UNION Use Case
+
+- The `UNION` operator is used to combine the result sets of 2 or more `SELECT` statements. It removes duplicate rows between the various `SELECT` statements.
+
+- Each `SELECT` statement within the `UNION` must have the same number of fields in the result sets with similar data types.
+
+- Typically, the use case for leveraging the `UNION` command in SQL is when a user wants to pull together distinct values of specified columns that are spread across multiple tables. For example, a chef wants to pull together the ingredients and respective aisle across three separate meals that are maintained in different tables.
+
+### Details of UNION
+
+- There must be the same number of expressions in both `SELECT` statements.
+
+- The corresponding expressions must have the same data type in the `SELECT` statements. For example: expression1 must be the same data type in both the first and second `SELECT` statement.
+
+### Expert Tip
+
+- `UNION` removes duplicate rows.
+- `UNION ALL` does not remove duplicate rows.
+
+### Resources
+
+- The resource [here](https://www.techonthenet.com/sql/union.php) on SQL UNIONs is helpful in understanding syntax and examples.
 
 ## UNION Motivation
 
