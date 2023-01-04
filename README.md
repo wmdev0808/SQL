@@ -11,3 +11,4 @@
 - [Learning SQL Programming](challenge-005/README.md)
 - [SQL Code Challenges](challenge-006/README.md)
 - [SQL for Testers](challenge-007/README.md)
+- [SQL Essential Training](challenge-008/README.md)
