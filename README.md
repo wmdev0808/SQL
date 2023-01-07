@@ -14,3 +14,4 @@
 - [SQL Essential Training](challenge-008/README.md)
 - [Advanced SQL - Logical Query Processing, Part 1](challenge-009/README.md)
 - [Advanced SQL - Logical Query Processing, Part 2](challenge-010/README.md)
+- [Advanced SQL - Window Functions](challenge-011/README.md)
