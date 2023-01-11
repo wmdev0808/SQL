@@ -17,3 +17,4 @@
 - [Advanced SQL - Window Functions](challenge-011/README.md)
 - [ Advanced SQL for Query Tuning and Performance Optimization](challenge-012/README.md)
 - [Advanced SQL for Data Science - Time Series](challenge-013/README.md)
+- [SQL Certification](challenge-014/README.md)
