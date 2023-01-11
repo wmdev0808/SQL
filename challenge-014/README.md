@@ -3863,3 +3863,576 @@
           ORA-06512: at "SYS.GET_RECENT_RECORD", line 21
           ORA-06512: at line 4
           ```
+
+## 2. SQL Basic Objects
+
+### 2.1. SQL Basic Objects
+
+- SQL objects are schemas, journals, catalogs, tables, aliases, views, indexes, constraints, triggers, sequences, stored procedures, user-defined functions, user-defined types, global variables, and SQL packages. SQL creates and maintains these objects as system objects.
+
+- `Schemas`
+
+  - A schema provides a logical grouping of SQL objects. A schema consists of a library, a journal, a journal receiver, a catalog, and, optionally, a data dictionary.
+
+- `Journals and journal receivers`
+
+  - A journal and a journal receiver are used to record changes to tables and views in the database.
+
+- `Catalogs`
+
+  - An SQL catalog is a collection of tables and views that describe tables, views, indexes, procedures, functions, sequences, triggers, variables, constraints, programs, packages, and XSR objects.
+
+- `Tables, rows, and columns`
+
+  - A table is a two-dimensional arrangement of data that consists of rows and columns.
+
+- `Aliases`
+
+  - An alias is an alternate name for a table or view.
+
+- `Views`
+
+  - A view appears like a table to an application program. However, a view contains no data and only logically represents one or more tables over which it is created.
+
+- `Indexes`
+
+  - An SQL index is a subset of the data in the columns of a table that are logically arranged in either ascending or descending order.
+
+- `Constraints`
+
+  - A constraint is a rule enforced by the database manager to limit the values that can be inserted, deleted, or updated in a table.
+
+- `Triggers`
+
+  - A trigger is a set of actions that runs automatically whenever a specified event occurs to a specified table or view.
+
+- `Stored procedures`
+
+  - A stored procedure is a program that can be called with the SQL CALL statement.
+
+- `Sequences`
+
+  - A sequence is a data area object that provides a quick and easy way of generating unique numbers.
+
+- `Global variables`
+
+  - A global variable is a named variable that can be created, accessed, and modified using SQL.
+
+- `User-defined functions`
+
+  - A user-defined function is a program that can be called like any built-in functions.
+
+- `User-defined types`
+
+  - A user-defined type is a data type that you can define independently of the data types that are provided by the database management system.
+
+- `XSR objects`
+
+  - An XSR object is one or more XML schema documents that have been registered in the XML schema repository with the same name.
+
+- `SQL packages`
+
+  - An SQL package is an object that contains the control structure produced when the SQL statements in an application program are bound to a remote relational database management system (DBMS).
+
+### 2.2. Data Types
+
+### 2.3. Operators
+
+## 3. Schemas and Different Types of Commands
+
+### 3.1. Introduction to Schema
+
+- What is Schema in SQL?
+  - A schema is a collection of logical structures of data, or schema objects.
+
+### 3.2. Creating, Altering, Scripting, and Dropping Databases
+
+### 3.3. Data Definition Language
+
+- Data definition language (DDL) describes the portion of SQL that creates, alters, and deletes database objects. These database objects include schemas, tables, views, sequences, catalogs, indexes, variables, masks, permissions, and aliases.
+
+- List of DDL commands:
+
+  - `CREATE`: This command is used to create the database or its objects (like table, index, function, views, store procedure, and triggers).
+  - `DROP`: This command is used to delete objects from the database.
+  - `ALTER`: This is used to alter the structure of the database.
+  - `TRUNCATE`: This is used to remove all records from a table, including all spaces allocated for the records are removed.
+  - `COMMENT`: This is used to add comments to the data dictionary.
+  - `RENAME`: This is used to rename an object existing in the database.
+
+### 3.4. Altering Various Database Objects
+
+### 3.5. Data Control Language
+
+- As database security administrator, you use Data Control Language (DCL) SQL commands to control user access to database objects and their contents.
+
+  - List of DCL commands:
+
+    - `GRANT`: This command gives users access privileges to the database.
+    - `REVOKE`: This command withdraws the user’s access privileges given by using the GRANT command.
+
+### 3.6. Data Manipulation Language-Inserting, Updating, Deleting from Database Objects
+
+- A data manipulation language (DML) is a computer programming language used for adding (inserting), deleting, and modifying (updating) data in a database.
+
+- List of DML commands:
+
+  - `INSERT` : It is used to insert data into a table.
+  - `UPDATE`: It is used to update existing data within a table.
+  - `DELETE` : It is used to delete records from a database table.
+  - `LOCK`: Table control concurrency.
+  - `CALL`: Call a PL/SQL or JAVA subprogram.
+  - `EXPLAIN PLAN`: It describes the access path to data.
+
+### 3.7. Metadata
+
+- Oracle metadata
+
+  - Oracle Database provides information about all of the `tables`, `views`, `columns`, and `procedures` in a database. This information about information is known as `metadata`.[1] It is stored in two locations: data dictionary tables (accessed via built-in views) and a metadata registry.
+
+    - Other relational database management systems support an ANSI-standard equivalent called information schema.
+
+  - Views for metadata
+
+    - The main built-in views accessing Oracle RDBMS data dictionary tables are few, and are as follows:
+
+      - ALL_OBJECTS – list of all objects in the current database that are accessible to the current user;
+      - ALL_TABLES – list of all tables in the current database that are accessible to the current user;
+      - ALL_VIEWS – list of all views in the current database that are accessible to the current user;
+      - ALL_TAB_COLUMNS – list of all columns in the database that are accessible to the current user;
+      - ALL_ARGUMENTS – lists the arguments of functions and procedures that are accessible to the current user;
+      - ALL_ERRORS – lists descriptions of errors on all stored objects (views, procedures, functions, packages, and package bodies) that are accessible to the current user;
+      - ALL_OBJECT_SIZE – included for backward compatibility with Oracle version 5;
+      - ALL_PROCEDURES – (from Oracle 9 onwards) lists all functions and procedures (along with associated properties) that are accessible to the current user;
+      - ALL_SOURCE – describes the text (i.e. PL/SQL) source of the stored objects accessible to the current user;
+      - ALL_TRIGGERS – list all the triggers accessible to the current user.
+
+    - In addition there are equivalent views prefixed "USER*" which show only the objects owned by the current user (i.e. a more restricted view of metadata) and prefixed "DBA*" which show all objects in the database (i.e. an unrestricted global view of metadata for the database instance). Naturally the access to "DBA\_" metadata views requires specific privileges.
+
+### 3.8. Derived Tables, Temporary Tables and Table Variables
+
+- Dervied Tables
+
+  - A derived table is an expression that generates a table within the scope of a query `FROM` clause. For example, a subquery in a `SELECT` statement `FROM` clause is a derived table:
+
+    ```
+    SELECT ... FROM (subquery) [AS] tbl_name ...
+    ```
+
+    - The [AS] tbl_name clause is mandatory because every table in a FROM clause must have a name. Any columns in the derived table must have unique names.
+
+  - Derived tables are subject to these restrictions:
+
+    - A derived table cannot be a correlated subquery.
+
+    - A derived table cannot contain references to other tables of the same SELECT.
+
+    - A derived table cannot contain outer references. This is a MySQL restriction, not a restriction of the SQL standard.
+
+- Temporary Tables
+
+  - There are RDBMS, which support temporary tables. Temporary Tables are a great feature that lets you store and process intermediate results by using the same selection, update, and join capabilities that you can use with typical SQL Server tables.
+
+  - The temporary tables could be very useful in some cases to keep temporary data. The most important thing that should be known for temporary tables is that they will be deleted when the current client session terminates.
+
+- Table Variable
+  - This acts like a variable and exists for a particular batch of query execution. It gets dropped once it comes out of the batch. This is also created in the tempdb database but not the memory. This also allows you to create a primary key, identity at the time of Table variable declaration but not non-clustered index.
+
+## 4. Maintenance and Control of table
+
+### 4.1. Introduction
+
+### 4.2. SELECT Statement
+
+- The SELECT statement is used to select data from a database.
+
+- Syntax:
+
+  ```
+  SELECT column1, column2, ...
+  FROM table_name;
+  ```
+
+### 4.3. INSERT Statement
+
+- The INSERT INTO statement is used to insert new records in a table.
+
+- Syntax:
+
+  ```
+  INSERT INTO table_name (column1, column2, column3, ...)
+  VALUES (value1, value2, value3, ...);
+  ```
+
+  ```
+  INSERT INTO table_name
+  VALUES (value1, value2, value3, ...);
+  ```
+
+### 4.4. UPDATE Statement
+
+- The UPDATE statement is used to modify the existing records in a table.
+
+- Syntax:
+
+  ```
+  UPDATE table_name
+  SET column1 = value1, column2 = value2, ...
+  WHERE condition;
+  ```
+
+### 4.5. DELETE Statement
+
+- The DELETE statement is used to delete existing records in a table.
+
+- Syntax:
+
+  ```
+  DELETE FROM table_name WHERE condition;
+  ```
+
+### 4.6. GRANT Statement
+
+- Use the GRANT statement to give privileges to a specific user or role, or to all users, to perform actions on database objects. You can also use the GRANT statement to grant a role to a user, to PUBLIC, or to another role.
+
+- Syntax for tables
+
+  ```
+  GRANT privilege-type ON [TABLE] { table-Name | view-Name } TO grantees
+  ```
+
+- Syntax for routines
+
+  ```
+  GRANT EXECUTE ON { FUNCTION | PROCEDURE } routine-designator TO grantees
+  ```
+
+- Syntax for sequence generators
+
+  ```
+  GRANT USAGE ON SEQUENCE [ schemaName. ] SQL92Identifier TO grantees
+  ```
+
+- Syntax for user-defined types
+
+  ```
+  GRANT USAGE ON TYPE [ schemaName. ] SQL92Identifier TO grantees
+  ```
+
+- Syntax for roles
+
+  ```
+  GRANT roleName [ {, roleName }* ] TO grantees
+  ```
+
+- privilege-types
+
+  ```
+  ALL PRIVILEGES | privilege-list
+  ```
+
+- privilege-list
+
+  ```
+  table-privilege {, table-privilege }*
+  ```
+
+- table-privilege
+
+  ```
+  DELETE |
+  INSERT |
+  REFERENCES [column list] |
+  SELECT [column list] |
+  TRIGGER |
+  UPDATE [column list]
+  ```
+
+- column list
+  ```
+  ( column-identifier {, column-identifier}* )
+  ```
+- Use cases:
+
+  - Use the ALL PRIVILEGES privilege type to grant all of the privileges to the user or role for the specified table. You can also grant one or more table privileges by specifying a privilege-list.
+
+  - Use the DELETE privilege type to grant permission to delete rows from the specified table.
+
+  - Use the INSERT privilege type to grant permission to insert rows into the specified table.
+
+  - Use the REFERENCES privilege type to grant permission to create a foreign key reference to the specified table. If a column list is specified with the REFERENCES privilege, the permission is valid on only the foreign key reference to the specified columns.
+
+  - Use the SELECT privilege type to grant permission to perform SELECT statements or SelectExpressions on a table or view. If a column list is specified with the SELECT privilege, the permission is valid on only those columns. If no column list is specified, then the privilege is valid on all of the columns in the table.
+
+    - For queries that do not select a specific column from the tables involved in a SELECT statement or SelectExpression (for example, queries that use COUNT(\*)), the user must have at least one column-level SELECT privilege or table-level SELECT privilege.
+
+  - Use the TRIGGER privilege type to grant permission to create a trigger on the specified table.
+
+  - Use the UPDATE privilege type to grant permission to use the UPDATE statement on the specified table. If a column list is specified, the permission applies only to the specified columns. To update a row using a statement that includes a WHERE clause, you must have the SELECT privilege on the columns in the row that you want to update.
+
+- grantees
+
+  ```
+  { AuthorizationIdentifier | roleName | PUBLIC }
+  [, { AuthorizationIdentifier | roleName | PUBLIC } ] *
+  ```
+
+  - You can grant privileges or roles to specific users or roles or to all users. Use the keyword PUBLIC to specify all users. When PUBLIC is specified, the privileges or roles affect all current and future users. The privileges granted to PUBLIC and to individual users or roles are independent privileges. For example, a SELECT privilege on table t is granted to both PUBLIC and to the authorization ID harry. The SELECT privilege is later revoked from the authorization ID harry, but Harry can access the table t through the PUBLIC privilege.
+
+  - Either the object owner or the database owner can grant privileges to a user or to a role. Only the database owner can grant a role to a user or to another role.
+
+- routine-designator
+
+  ```
+  {
+    function-name | procedure-name
+  }
+  ```
+
+- Examples
+
+  - To grant the SELECT privilege on table t to the authorization IDs maria and harry, use the following syntax:
+
+    ```
+    GRANT SELECT ON TABLE t TO maria,harry
+    ```
+
+  - To grant the UPDATE and TRIGGER privileges on table t to the authorization IDs anita and zhi, use the following syntax:
+
+    ```
+    GRANT UPDATE, TRIGGER ON TABLE t TO anita,zhi
+    ```
+
+  - To grant the SELECT privilege on table s.v to all users, use the following syntax:
+
+    ```
+    GRANT SELECT ON TABLE s.v to PUBLIC
+    ```
+
+  - To grant the EXECUTE privilege on procedure p to the authorization ID george, use the following syntax:
+
+    ```
+    GRANT EXECUTE ON PROCEDURE p TO george
+    ```
+
+  - To grant the role purchases_reader_role to the authorization IDs george and maria, use the following syntax:
+
+    ```
+    GRANT purchases_reader_role TO george,maria
+    ```
+
+  - To grant the SELECT privilege on table t to the role purchases_reader_role, use the following syntax:
+
+    ```
+    GRANT SELECT ON TABLE t TO purchases_reader_role
+    ```
+
+  - To grant the USAGE privilege on the sequence generator order_id to the role sales_role, use the following syntax:
+
+    ```
+    GRANT USAGE ON SEQUENCE order_id TO sales_role;
+    ```
+
+  - To grant the USAGE privilege on the user-defined type price to the role finance_role, use the following syntax:
+
+    ```
+    GRANT USAGE ON TYPE price TO finance_role;
+    ```
+
+### 4.7. REVOKE Statement
+
+- Use the REVOKE statement to remove privileges from a specific user or role, or from all users, to perform actions on database objects. You can also use the REVOKE statement to revoke a role from a user, from PUBLIC, or from another role.
+
+- Syntax for tables
+
+  ```
+  REVOKE privilege-type ON [ TABLE ] { table-Name | view-Name } FROM grantees
+  ```
+
+  - Revoking a privilege without specifying a column list revokes the privilege for all of the columns in the table.
+
+- Syntax for routines
+
+  ```
+  REVOKE EXECUTE ON { FUNCTION | PROCEDURE } routine-designator FROM grantees  RESTRICT
+  ```
+
+  - You must use the RESTRICT clause on REVOKE statements for routines. The RESTRICT clause specifies that the EXECUTE privilege cannot be revoked if the specified routine is used in a view, trigger, or constraint, and the privilege is being revoked from the owner of the view, trigger, or constraint.
+
+- Syntax for sequence generators
+
+  ```
+  REVOKE USAGE ON SEQUENCE [ schemaName. ] SQL92Identifier FROM grantees RESTRICT
+  ```
+
+  - In order to use a sequence generator, you must have the USAGE privilege on it. This privilege can be revoked from users and roles. Only RESTRICTed revokes are allowed. This means that the REVOKE statement cannot make a view, trigger, or constraint unusable by its owner. The USAGE privilege cannot be revoked from the schema owner. See CREATE SEQUENCE statement for more information.
+
+  - The sequence name is composed of an optional schemaName and a SQL92Identifier. If a schemaName is not provided, the current schema is the default schema. If a qualified sequence name is specified, the schema name cannot begin with SYS.
+
+- Syntax for user-defined types
+
+  ```
+  REVOKE USAGE ON TYPE  [ schemaName. ] SQL92Identifier FROM grantees RESTRICT
+  ```
+
+  - In order to use a user-defined type, you must have the USAGE privilege on it. This privilege can be revoked from users and roles. Only RESTRICTed revokes are allowed. This means that the REVOKE statement cannot make a view, trigger, or constraint unusable by its owner. The USAGE privilege cannot be revoked from the schema owner. See CREATE TYPE statement for more information.
+
+  - The type name is composed of an optional schemaName and a SQL92Identifier. If a schemaName is not provided, the current schema is the default schema. If a qualified type name is specified, the schema name cannot begin with SYS.
+
+- Syntax for roles
+
+  ```
+  REVOKE roleName [ {, roleName }* ] FROM grantees
+  ```
+
+- Examples
+
+  - To revoke the SELECT privilege on table t from the authorization IDs maria and harry, use the following syntax:
+
+    ```
+    REVOKE SELECT ON TABLE t FROM maria,harry
+    ```
+
+  - To revoke the UPDATE and TRIGGER privileges on table t from the authorization IDs anita and zhi, use the following syntax:
+
+    ```
+    REVOKE UPDATE, TRIGGER ON TABLE t FROM anita,zhi
+    ```
+
+  - To revoke the SELECT privilege on table s.v from all users, use the following syntax:
+
+    ```
+    REVOKE SELECT ON TABLE s.v FROM PUBLIC
+    ```
+
+  - To revoke the UPDATE privilege on columns c1 and c2 of table s.v from all users, use the following syntax:
+
+    ```
+    REVOKE UPDATE (c1,c2) ON TABLE s.v FROM PUBLIC
+    ```
+
+  - To revoke the EXECUTE privilege on procedure p from the authorization ID george, use the following syntax:
+
+    ```
+    REVOKE EXECUTE ON PROCEDURE p FROM george RESTRICT
+    ```
+
+  - To revoke the role purchases_reader_role from the authorization IDs george and maria, use the following syntax:
+
+    ```
+    REVOKE purchases_reader_role FROM george,maria
+    ```
+
+  - To revoke the SELECT privilege on table t from the role purchases_reader_role, use the following syntax:
+
+    ```
+    REVOKE SELECT ON TABLE t FROM purchases_reader_role
+    ```
+
+  - To revoke the USAGE privilege on the sequence generator order_id from the role sales_role, use the following syntax:
+
+    ```
+    REVOKE USAGE ON SEQUENCE order_id FROM sales_role;
+    ```
+
+  - To revoke the USAGE privilege on the user-defined type price from the role finance_role, use the following syntax:
+
+    ```
+    REVOKE USAGE ON TYPE price FROM finance_role;
+    ```
+
+## 5. Aliases, Constraints and Clauses
+
+### 5.1. Aliases
+
+### 5.2. Constraints
+
+### 5.3. Clauses
+
+### 5.4. Types of Constraints
+
+## 6. Relational Algebra
+
+### 6.1. Basics of Relational Algebra
+
+### 6.2. Projection
+
+### 6.3. Selection
+
+### 6.4. Renaming and Union
+
+### 6.5. Intersection and Assignment
+
+### 6.6. Cartesian Product
+
+## 7. Sub Queries and Normalization
+
+### 7.1. Introduction to Sub Query
+
+### 7.2. Building Nested Sub Query
+
+### 7.3. Normalization
+
+### 7.4. First Normal Form
+
+### 7.5. Second Normal Form
+
+### 7.6. Third Normal Form
+
+### 7.7. Other Normal Forms
+
+### 7.8. Correlated Sub Query
+
+## 8. Joins and Functions
+
+### 8.1. The JOIN Clause
+
+### 8.2. Inner Join
+
+### 8.3. Outer Join
+
+### 8.4. Functions
+
+### 8.5. Cross Join
+
+### 8.6. Aggregate Functions
+
+### 8.7. Scalar Functions
+
+## 9. Introduction to Views and Complex Queries
+
+### 9.1. Views
+
+### 9.2. Advantages and Disadvantages of Views
+
+### 9.3. Nested Queries or Subqueries Contd.
+
+### 9.4. Complex Queries
+
+### 9.5. Nested Queries or Subqueries
+
+### 9.6. Example of Complex Queries
+
+## 10. Understanding Transactions and Indexes
+
+### 10.1. Multiuser Databases
+
+### 10.2. Transaction
+
+### 10.3. Index
+
+### 10.4. Types of Index
+
+## 11. Understanding Triggers, Cursors and Stored procedures
+
+### 11.1. Introduction to Triggers
+
+### 11.2. Types of Triggers
+
+### 11.3. Introduction to Cursors
+
+### 11.4. Types of Cursors
+
+### 11.5. Introduction to Stored Procedures
+
+### 11.6. Advantages and Disadvantages of Cusors
