@@ -4345,11 +4345,1319 @@
 
 ### 5.1. Aliases
 
+- SQL aliases are used to give a table, or a column in a table, a temporary name.
+
+  - An alias only exists for the duration of that query.
+
+  - An alias is created with the `AS` keyword.
+
+- Alias Column Syntax
+
+  ```
+  SELECT column_name AS alias_name
+  FROM table_name;
+  ```
+
+- Alias Table Syntax
+
+  ```
+  SELECT column_name(s)
+  FROM table_name AS alias_name;
+  ```
+
 ### 5.2. Constraints
+
+- SQL constraints are used to specify rules for data in a table.
+
+- SQL Create Constraints
+
+  - Constraints can be specified when the table is created with the `CREATE TABLE` statement, or after the table is created with the `ALTER TABLE` statement.
+  - Syntax:
+
+    ```
+    CREATE TABLE table_name (
+        column1 datatype constraint,
+        column2 datatype constraint,
+        column3 datatype constraint,
+        ....
+    );
+    ```
+
+- SQL Constraints
+
+  - Constraints are used to limit the type of data that can go into a table. This ensures the accuracy and reliability of the data in the table. If there is any violation between the constraint and the data action, the action is aborted.
+
+  - Constraints can be column level or table level. Column level constraints apply to a column, and table level constraints apply to the whole table.
+
+  - The following constraints are commonly used in SQL:
+    - `NOT NULL` - Ensures that a column cannot have a NULL value
+    - `UNIQUE` - Ensures that all values in a column are different
+    - `PRIMARY KEY` - A combination of a NOT NULL and UNIQUE. Uniquely identifies each row in a table
+    - `FOREIGN KEY` - Prevents actions that would destroy links between tables
+    - `CHECK` - Ensures that the values in a column satisfies a specific condition
+    - `DEFAULT` - Sets a default value for a column if no value is specified
+    - `CREATE INDEX` - Used to create and retrieve data from the database very quickly
 
 ### 5.3. Clauses
 
+- What are Clauses in SQL?
+
+  - In general terms, a clause is just a logical chunk of a SQL statement - and, usually, is a chunk that is (theoretically) optional.
+
+- `CONSTRAINT` clause
+
+  - A CONSTRAINT clause is an optional part of a `CREATE TABLE` statement or `ALTER TABLE` statement. A constraint is a rule to which data must conform. Constraint names are optional.
+
+  - A CONSTRAINT can be one of the following:
+
+    - a column-level constraint
+
+      - Column-level constraints refer to a single column in the table and do not specify a column name (except check constraints). They refer to the column that they follow.
+
+    - a table-level constraint
+      - Table-level constraints refer to one or more columns in the table. Table-level constraints specify the names of the columns to which they apply. Table-level `CHECK` constraints can refer to 0 or more columns in the table.
+
+  - Column constraints include:
+
+    - `NOT NULL`
+
+      - Specifies that this column cannot hold `NULL` values (constraints of this type are not nameable).
+
+    - `PRIMARY KEY`
+
+      - Specifies the column that uniquely identifies a row in the table. The identified columns must be defined as `NOT NULL`.
+
+      - Note: If you attempt to add a primary key using `ALTER TABLE` and any of the columns included in the primary key contain null values, an error will be generated and the primary key will not be added. See `ALTER TABLE` statement for more information.
+
+    - `UNIQUE`
+
+      - Specifies that values in the column must be unique.
+
+    - `FOREIGN KEY`
+
+      - Specifies that the values in the column must correspond to values in a referenced primary key or unique key column or that they are `NULL`.
+
+    - `CHECK`
+      - Specifies rules for values in the column.
+
+  - Table constraints include:
+
+    - `PRIMARY KEY`
+
+      - Specifies the column or columns that uniquely identify a row in the table. `NULL` values are not allowed.
+
+    - `UNIQUE`
+
+      - Specifies that values in the columns must be unique.
+
+    - `FOREIGN KEY`
+
+      - Specifies that the values in the columns must correspond to values in referenced primary key or unique columns or that they are `NULL`.
+
+      - Note: If the foreign key consists of multiple columns, and any column is `NULL`, the whole key is considered `NULL`. The insert is permitted no matter what is on the non-null columns.
+
+    - `CHECK`
+      - Specifies a wide range of rules for values in the table.
+
+  - Column constraints and table constraints have the same function; the difference is in where you specify them. Table constraints allow you to specify more than one column in a `PRIMARY KEY`, `UNIQUE`, `CHECK`, or `FOREIGN KEY` constraint definition. Column-level constraints (except for check constraints) refer to only one column.
+
+  - A constraint operates with the privileges of the owner of the constraint. See "Using SQL standard authorization" and "Privileges on views, triggers, and constraints" in the Java DB Developer's Guide for details.
+
+  - Syntax:
+
+    - Primary key constraints
+
+      - A primary key defines the set of columns that uniquely identifies rows in a table.
+
+      - When you create a primary key constraint, none of the columns included in the primary key can have `NULL` constraints; that is, they must not permit `NULL` values.
+
+      - `ALTER TABLE ADD PRIMARY KEY` allows you to include existing columns in a primary key if they were first defined as `NOT NULL`. `NULL` values are not allowed. If the column(s) contain `NULL` values, the system will not add the primary key constraint. See `ALTER TABLE` statement for more information.
+      - A table can have at most one `PRIMARY KEY` constraint.
+
+    - Unique constraints
+
+      - A `UNIQUE` constraint defines a set of columns that uniquely identify rows in a table only if all the key values are not `NULL`. If one or more key parts are `NULL`, duplicate keys are allowed.
+
+      - For example, if there is a `UNIQUE` constraint on col1 and col2 of a table, the combination of the values held by col1 and col2 will be unique as long as these values are not `NULL`. If one of col1 and col2 holds a `NULL` value, there can be another identical row in the table.
+
+      - A table can have multiple `UNIQUE` constraints.
+
+    - Foreign key constraints
+
+      - Foreign keys provide a way to enforce the referential integrity of a database. A foreign key is a column or group of columns within a table that references a key in some other table (or sometimes, though rarely, the same table). The foreign key must always include the columns of which the types exactly match those in the referenced primary key or unique constraint.
+
+      - For a table-level foreign key constraint in which you specify the columns in the table that make up the constraint, you cannot use the same column more than once.
+
+      - If there is a column list in the _ReferencesSpecification_ (a list of columns in the referenced table), it must correspond either to a unique constraint or to a primary key constraint in the referenced table. The _ReferencesSpecification_ can omit the column list for the referenced table if that table has a declared primary key.
+
+      - A foreign key constraint is satisfied if there is a matching value in the referenced unique or primary key column. If the foreign key consists of multiple columns, the foreign key value is considered NULL if any of its columns contains a NULL.
+
+      - Note: It is possible for a foreign key consisting of multiple columns to allow one of the columns to contain a value for which there is no matching value in the referenced columns, per the SQL-92 standard. To avoid this situation, create NOT NULL constraints on all of the foreign key's columns.
+
+    - Foreign key constraints and DML
+
+      - When you insert into or update a table with an enabled foreign key constraint, Derby checks that the row does not violate the foreign key constraint by looking up the corresponding referenced key in the referenced table. If the constraint is not satisfied, Derby rejects the insert or update with a statement exception.
+
+      - When you update or delete a row in a table with a referenced key (a primary or unique constraint referenced by a foreign key), Derby checks every foreign key constraint that references the key to make sure that the removal or modification of the row does not cause a constraint violation. If removal or modification of the row would cause a constraint violation, the update or delete is not permitted and Derby throws a statement exception.
+
+      - Derby performs constraint checks at the time the statement is executed, not when the transaction commits.
+
+    - Backing indexes
+
+      - UNIQUE, PRIMARY KEY, and FOREIGN KEY constraints generate indexes that enforce or "back" the constraint (and are sometimes called backing indexes). PRIMARY KEY constraints generate unique indexes. FOREIGN KEY constraints generate non-unique indexes. UNIQUE constraints generate unique indexes if all the columns are non-nullable, and they generate non-unique indexes if one or more columns are nullable. Therefore, if a column or set of columns has a UNIQUE, PRIMARY KEY, or FOREIGN KEY constraint on it, you do not need to create an index on those columns for performance. Derby has already created it for you. See Indexes and constraints.
+
+      - These indexes are available to the optimizer for query optimization (see CREATE INDEX statement) and have system-generated names.
+
+      - You cannot drop backing indexes with a DROP INDEX statement; you must drop the constraint or the table.
+
+    - Check constraints
+
+      - A check constraint can be used to specify a wide range of rules for the contents of a table. A search condition (which is a boolean expression) is specified for a check constraint. This search condition must be satisfied for all rows in the table.
+
+      - The search condition is applied to each row that is modified on an INSERT or UPDATE at the time of the row modification. The entire statement is aborted if any check constraint is violated.
+
+    - Requirements for search condition
+
+      - If a check constraint is specified as part of a column-definition, a column reference can only be made to the same column. Check constraints specified as part of a table definition can have column references identifying columns previously defined in the CREATE TABLE statement.
+
+      - The search condition must always return the same value if applied to the same values. Thus, it cannot contain any of the following:
+
+        - Dynamic parameters (?)
+        - Date/Time Functions (CURRENT_DATE, CURRENT_TIME, CURRENT_TIMESTAMP)
+        - Subqueries
+        - User Functions (such as USER, SESSION_USER, CURRENT_USER)
+
+    - Referential actions
+
+      - You can specify an `ON DELETE` clause and/or an `ON UPDATE` clause, followed by the appropriate action (`CASCADE`, `RESTRICT`, `SET NULL`, or `NO ACTION`) when defining foreign keys. These clauses specify whether Derby should modify corresponding foreign key values or disallow the operation, to keep foreign key relationships intact when a primary key value is updated or deleted from a table.
+
+      - You specify the update and delete rule of a referential constraint when you define the referential constraint.
+
+      - The update rule applies when a row of either the parent or dependent table is updated. The choices are `NO ACTION` and `RESTRICT`.
+
+      - When a value in a column of the parent table's primary key is updated and the update rule has been specified as `RESTRICT`, Derby checks dependent tables for foreign key constraints. If any row in a dependent table violates a foreign key constraint, the transaction is rolled back.
+
+      - If the update rule is NO ACTION, Derby checks the dependent tables for foreign key constraints after all updates have been executed but before triggers have been executed. If any row in a dependent table violates a foreign key constraint, the statement is rejected.
+
+      - When a value in a column of the dependent table is updated, and that value is part of a foreign key, NO ACTION is the implicit update rule. NO ACTION means that if a foreign key is updated with a non-null value, the update value must match a value in the parent table's primary key when the update statement is completed. If the update does not match a value in the parent table's primary key, the statement is rejected.
+
+      - The delete rule applies when a row of the parent table is deleted and that row has dependents in the dependent table of the referential constraint. If rows of the dependent table are deleted, the delete operation on the parent table is said to be propagated to the dependent table. If the dependent table is also a parent table, the action specified applies, in turn, to its dependents.
+
+      - The choices are `NO ACTION`, `RESTRICT`, `CASCADE`, or `SET NULL`. `SET NULL` can be specified only if some column of the foreign key allows null values.
+
+      - If the delete rule is:
+
+        - `NO ACTION`, Derby checks the dependent tables for foreign key constraints after all deletes have been executed but before triggers have been executed. If any row in a dependent table violates a foreign key constraint, the statement is rejected.
+
+        - `RESTRICT`, Derby checks dependent tables for foreign key constraints. If any row in a dependent table violates a foreign key constraint, the transaction is rolled back.
+
+        - `CASCADE`, the delete operation is propagated to the dependent table (and that table's dependents, if applicable).
+
+        - `SET NULL`, each nullable column of the dependent table's foreign key is set to null. (Again, if the dependent table also has dependent tables, nullable columns in those tables' foreign keys are also set to null.)
+
+      - Each referential constraint in which a table is a parent has its own delete rule; all applicable delete rules are used to determine the result of a delete operation. Thus, a row cannot be deleted if it has dependents in a referential constraint with a delete rule of RESTRICT or NO ACTION. Similarly, a row cannot be deleted if the deletion cascades to any of its descendants that are dependents in a referential constraint with the delete rule of RESTRICT or NO ACTION.
+
+      - Deleting a row from the parent table involves other tables. Any table involved in a delete operation on the parent table is said to be delete-connected to the parent table. The delete can affect rows of these tables in the following ways:
+
+        - If the delete rule is RESTRICT or NO ACTION, a dependent table is involved in the operation but is not affected by the operation. (That is, Derby checks the values within the table, but does not delete any values.)
+        - If the delete rule is SET NULL, a dependent table's rows can be updated when a row of the parent table is the object of a delete or propagated delete operation.
+        - If the delete rule is CASCADE, a dependent table's rows can be deleted when a parent table is the object of a delete.
+        - If the dependent table is also a parent table, the actions described in this list apply, in turn, to its dependents.
+
+  - Examples
+
+    ```
+    -- column-level primary key constraint named OUT_TRAY_PK:
+    CREATE TABLE SAMP.OUT_TRAY
+      (
+      SENT TIMESTAMP,
+      DESTINATION CHAR(8),
+      SUBJECT CHAR(64) NOT NULL CONSTRAINT OUT_TRAY_PK PRIMARY KEY,
+      NOTE_TEXT VARCHAR(3000)
+      );
+
+    -- the table-level primary key definition allows you to
+    -- include two columns in the primary key definition:
+    CREATE TABLE SAMP.SCHED
+      (
+      CLASS_CODE CHAR(7) NOT NULL,
+      DAY SMALLINT NOT NULL,
+      STARTING TIME,
+      ENDING TIME,
+      PRIMARY KEY (CLASS_CODE, DAY)
+      );
+
+    -- Use a column-level constraint for an arithmetic check
+    -- Use a table-level constraint
+    -- to make sure that a employee's taxes does not
+    -- exceed the bonus
+    CREATE TABLE SAMP.EMP
+      (
+      EMPNO CHAR(6) NOT NULL CONSTRAINT EMP_PK PRIMARY KEY,
+      FIRSTNME CHAR(12) NOT NULL,
+      MIDINIT vARCHAR(12) NOT NULL,
+      LASTNAME VARCHAR(15) NOT NULL,
+      SALARY DECIMAL(9,2) CONSTRAINT SAL_CK CHECK (SALARY >= 10000),
+      BONUS DECIMAL(9,2),
+      TAX DECIMAL(9,2),
+      CONSTRAINT BONUS_CK CHECK (BONUS > TAX)
+      );
+
+    -- use a check constraint to allow only appropriate
+    -- abbreviations for the meals
+    CREATE TABLE FLIGHTS
+      (
+      FLIGHT_ID CHAR(6) NOT NULL ,
+      SEGMENT_NUMBER INTEGER NOT NULL ,
+      ORIG_AIRPORT CHAR(3),
+      DEPART_TIME TIME,
+      DEST_AIRPORT CHAR(3),
+      ARRIVE_TIME TIME,
+      MEAL CHAR(1) CONSTRAINT MEAL_CONSTRAINT
+      CHECK (MEAL IN ('B', 'L', 'D', 'S')),
+      PRIMARY KEY (FLIGHT_ID, SEGMENT_NUMBER)
+      );
+
+    CREATE TABLE METROPOLITAN
+      (
+      HOTEL_ID INT NOT NULL CONSTRAINT HOTELS_PK PRIMARY KEY,
+      HOTEL_NAME VARCHAR(40) NOT NULL,
+      CITY_ID INT CONSTRAINT METRO_FK REFERENCES CITIES
+      );
+
+    -- create a table with a table-level primary key constraint
+    -- and a table-level foreign key constraint
+    CREATE TABLE FLTAVAIL
+      (
+      FLIGHT_ID CHAR(6) NOT NULL,
+      SEGMENT_NUMBER INT NOT NULL,
+      FLIGHT_DATE DATE NOT NULL,
+      ECONOMY_SEATS_TAKEN INT,
+      BUSINESS_SEATS_TAKEN INT,
+      FIRSTCLASS_SEATS_TAKEN INT,
+      CONSTRAINT FLTAVAIL_PK PRIMARY KEY (FLIGHT_ID, SEGMENT_NUMBER),
+      CONSTRAINT FLTS_FK
+      FOREIGN KEY (FLIGHT_ID, SEGMENT_NUMBER)
+      REFERENCES Flights (FLIGHT_ID, SEGMENT_NUMBER)
+      );
+    -- add a unique constraint to a column
+    ALTER TABLE SAMP.PROJECT
+    ADD CONSTRAINT P_UC UNIQUE (PROJNAME);
+
+    -- create a table whose city_id column references the
+    -- primary key in the Cities table
+    -- using a column-level foreign key constraint
+    CREATE TABLE CONDOS
+      (
+      CONDO_ID INT NOT NULL CONSTRAINT hotels_PK PRIMARY KEY,
+      CONDO_NAME VARCHAR(40) NOT NULL,
+      CITY_ID INT CONSTRAINT city_foreign_key
+      REFERENCES Cities ON DELETE CASCADE ON UPDATE RESTRICT
+      );
+    ```
+
+  - Statement dependency system
+
+    - INSERT and UPDATE statements depend on all constraints on the target table. DELETEs depend on unique, primary key, and foreign key constraints. These statements are invalidated if a constraint is added to or dropped from the target table.
+
+- `FOR UPDATE` clause
+
+  - The `FOR UPDATE` clause is an optional part of a SELECT statement. Cursors are read-only by default. The `FOR UPDATE` clause specifies that the cursor should be updatable, and enforces a check during compilation that the SELECT statement meets the requirements for an updatable cursor. For more information about updatability, see Requirements for updatable cursors and updatable ResultSets.
+
+  - Syntax:
+
+    ```
+    FOR
+    {
+        READ ONLY | FETCH ONLY |
+        UPDATE [ OF Simple-column-Name [ , Simple-column-Name]* ]
+    }
+    ```
+
+    - _Simple-column-Name_ refers to the names visible for the table specified in the FROM clause of the underlying query.
+
+    - Note: The use of the FOR UPDATE clause is not mandatory to obtain an updatable JDBC ResultSet. As long as the statement used to generate the JDBC ResultSet meets the requirements for updatable cursor, it is sufficient for the JDBC Statement that generates the JDBC ResultSet to have concurrency mode ResultSet.CONCUR_UPDATABLE for the ResultSet to be updatable.
+
+    - The optimizer is able to use an index even if the column in the index is being updated.
+
+  - Examples:
+
+    ```
+    SELECT RECEIVED, SOURCE, SUBJECT, NOTE_TEXT FROM SAMP.IN_TRAY FOR UPDATE
+    ```
+
+- `FROM` clause
+
+  - The `FROM` clause is a mandatory clause in a _SelectExpression_. It specifies the tables (_TableExpression_) from which the other clauses of the query can access columns for use in expressions.
+
+  - Syntax:
+
+    ```
+    FROM TableExpression [ , TableExpression ] *
+    ```
+
+  - Examples:
+
+    ```
+    SELECT Cities.city_id
+    FROM Cities
+    WHERE city_id < 5
+    -- other types of TableExpressions
+    SELECT TABLENAME, ISINDEX
+    FROM SYS.SYSTABLES T, SYS.SYSCONGLOMERATES C
+    WHERE T.TABLEID = C.TABLEID
+    ORDER BY TABLENAME, ISINDEX
+    -- force the join order
+    SELECT *
+    FROM Flights, FlightAvailability
+    WHERE FlightAvailability.flight_id = Flights.flight_id
+    AND FlightAvailability.segment_number = Flights.segment_number
+    AND Flights.flight_id < 'AA1115'
+    -- a TableExpression can be a joinOperation. Therefore
+    -- you can have multiple join operations in a FROM clause
+    SELECT COUNTRIES.COUNTRY, CITIES.CITY_NAME, FLIGHTS.DEST_AIRPORT
+    FROM COUNTRIES LEFT OUTER JOIN CITIES
+    ON COUNTRIES.COUNTRY_ISO_CODE = CITIES.COUNTRY_ISO_CODE
+    LEFT OUTER JOIN FLIGHTS
+    ON Cities.AIRPORT = FLIGHTS.DEST_AIRPORT
+    ```
+
+- `GROUP BY` clause
+
+  - A `GROUP BY` clause, part of a _SelectExpression_, groups a result into subsets that have matching values for one or more columns. In each group, no two rows have the same value for the grouping column or columns. NULLs are considered equivalent for grouping purposes.
+
+  - You typically use a `GROUP BY` clause in conjunction with an aggregate expression.
+
+  - Using the `ROLLUP` syntax, you can specify that multiple levels of grouping should be computed at once.
+
+  - Syntax:
+
+    ```
+    GROUP BY
+    {
+        column-Name [ , column-Name ]*
+    |
+        ROLLUP ( column-Name [ , column-Name ]* )
+    }
+    ```
+
+    - column-Name must be a column from the current scope of the query; there can be no columns from a query block outside the current scope. For example, if a `GROUP BY` clause is in a subquery, it cannot refer to columns in the outer query.
+
+  - _SelectItems_ in the _SelectExpression_ with a `GROUP BY` clause must contain only aggregates or grouping columns.
+
+  - Examples:
+
+    ```
+    -- find the average flying_times of flights grouped by
+    -- airport
+    SELECT AVG (flying_time), orig_airport
+    FROM Flights
+    GROUP BY orig_airport
+
+    SELECT MAX(city_name), region
+    FROM Cities, Countries
+    WHERE Cities.country_ISO_code = Countries.country_ISO_code
+    GROUP BY region
+
+    -- group by an a smallint
+    SELECT ID, AVG(SALARY)
+    FROM SAMP.STAFF
+    GROUP BY ID
+
+    -- Get the AVGSALARY and EMPCOUNT columns, and the DEPTNO column using the AS clause
+    -- And group by the WORKDEPT column using the correlation name OTHERS
+    SELECT OTHERS.WORKDEPT AS DEPTNO,
+    AVG(OTHERS.SALARY) AS AVGSALARY,
+    COUNT(*) AS EMPCOUNT
+    FROM SAMP.EMPLOYEE OTHERS
+    GROUP BY OTHERS.WORKDEPT
+
+    -- Compute sub-totals of Sales_History data, grouping it by Region, by
+    -- (Region, State), and by (Region, State, Product), as well as computing
+    -- an overall total of the sales for all Regions, States, and Products:
+    SELECT Region, State, Product, SUM(Sales) Total_Sales
+    FROM Sales_History
+    GROUP BY ROLLUP(Region, State, Product)
+    ```
+
+- `HAVING` clause
+
+  - A `HAVING` clause restricts the results of a `GROUP BY` in a _SelectExpression_. The `HAVING` clause is applied to each group of the grouped table, much as a `WHERE` clause is applied to a select list. If there is no `GROUP BY` clause, the `HAVING` clause is applied to the entire result as a single group. The `SELECT` clause cannot refer directly to any column that does not have a `GROUP BY` clause. It can, however, refer to constants, aggregates, and special registers.
+
+  - Syntax:
+
+    ```
+    HAVING searchCondition
+    ```
+
+    - The searchCondition, which is a specialized booleanExpression, can contain only grouping columns (see GROUP BY clause), columns that are part of aggregate expressions, and columns that are part of a subquery. For example, the following query is illegal, because the column SALARY is not a grouping column, it does not appear within an aggregate, and it is not within a subquery:
+
+      ```
+      -- SELECT COUNT(*)
+      -- F`ROM SAMP.STAFF
+      -- GROUP BY ID
+      -- HAVING SALARY > 15000`
+      ```
+
+    - Aggregates in the `HAVING` clause do not need to appear in the `SELECT` list. If the `HAVING` clause contains a subquery, the subquery can refer to the outer query block if and only if it refers to a grouping column.
+
+      ```
+      -- Find the total number of economy seats taken on a flight,
+      -- grouped by airline,
+      -- only when the group has at least 2 records.
+      SELECT SUM(ECONOMY_SEATS_TAKEN), AIRLINE_FULL
+      FROM FLIGHTAVAILABILITY, AIRLINES
+      WHERE SUBSTR(FLIGHTAVAILABILITY.FLIGHT_ID, 1, 2) = AIRLINE
+      GROUP BY AIRLINE_FULL
+      HAVING COUNT(*) > 1
+      ```
+
+- `ORDER BY` clause
+
+  - The ORDER BY clause is an optional element of the following:
+
+    - A `SELECT` statement
+    - A _SelectExpression_
+    - A VALUES expression
+    - A _ScalarSubquery_
+    - A _TableSubquery_
+
+  - It can also be used in an `INSERT` statement or a `CREATE VIEW` statement.
+
+  - An `ORDER BY` clause allows you to specify the order in which rows appear in the result set. In subqueries, the `ORDER BY` clause is meaningless unless it is accompanied by one or both of the `result offset and fetch first clauses` or in conjunction with the `ROW_NUMBER` function, since there is no guarantee that the order is retained in the outer result set. It is permissible to combine `ORDER BY` on the outer query with `ORDER BY` in subqueries.
+
+  - Syntax:
+
+    ```
+    ORDER BY { column-Name | ColumnPosition | Expression }
+      [ ASC | DESC ]
+      [ NULLS FIRST | NULLS LAST ]
+      [ , column-Name | ColumnPosition | Expression
+      [ ASC | DESC ]
+      [ NULLS FIRST | NULLS LAST ]
+      ] *
+    ```
+
+    - column-Name
+      - Refers to the names visible from the SelectItems in the underlying query of the SELECT statement. The column-Name that you specify in the ORDER BY clause does not need to be the SELECT list.
+    - ColumnPosition
+      - An integer that identifies the number of the column in the SelectItems in the underlying query of the SELECT statement. ColumnPosition must be greater than 0 and not greater than the number of columns in the result table. In other words, if you want to order by a column, that column must be specified in the SELECT list.
+    - Expression
+      - A sort key expression, such as numeric, string, and datetime expressions. Expression can also be a row value expression such as a scalar subquery or case expression.
+    - ASC
+      - Specifies that the results should be returned in ascending order. If the order is not specified, ASC is the default.
+    - DESC
+      - Specifies that the results should be returned in descending order.
+    - NULLS FIRST
+      - Specifies that NULL values should be returned before non-NULL values.
+    - NULLS LAST
+      - Specifies that NULL values should be returned after non-NULL values.
+
+  - Notes
+
+    - If `SELECT DISTINCT` is specified or if the `SELECT` statement contains a `GROUP BY` clause, the `ORDER BY` columns must be in the `SELECT` list.
+
+    - An `ORDER BY` clause prevents a `SELECT` statement from being an updatable cursor. For more information, see `Requirements for updatable cursors and updatable ResultSets`.
+
+    - If the null ordering is not specified then the handling of the null values is:
+
+      - NULLS LAST if the sort is ASC
+      - NULLS FIRST if the sort is DESC
+
+    - If neither ascending nor descending order is specified, and the null ordering is also not specified, then both defaults are used and thus the order will be ascending with NULLS LAST.
+
+  - Example using a correlation name
+
+    - You can sort the result set by a correlation name, if the correlation name is specified in the select list. For example, to return from the CITIES database all of the entries in the CITY_NAME and COUNTRY columns, where the COUNTRY column has the correlation name NATION, you specify this SELECT statement:
+
+    ```
+    SELECT CITY_NAME, COUNTRY AS NATION
+        FROM CITIES
+        ORDER BY NATION
+    ```
+
+  - Example using a numeric expression
+
+    - You can sort the result set by a numeric expression, for example:
+
+    ```
+    SELECT name, salary, bonus FROM employee
+      ORDER BY salary+bonus
+    ```
+
+    - In this example, the salary and bonus columns are DECIMAL data types.
+
+  - Example using a function
+
+    - You can sort the result set by invoking a function, for example:
+
+    ```
+    SELECT i, len FROM measures
+      ORDER BY sin(i)
+    ```
+
+  - Example specifying null ordering
+
+    - You can specify the position of NULL values using the null ordering specification:
+
+    ```
+    SELECT * FROM t1 ORDER BY c1 DESC NULLS LAST
+    ```
+
+- The result offset and fetch first clauses
+
+  - The _result offset_ clause provides a way to skip the N first rows in a result set before starting to return any rows. The _fetch first_ clause, which can be combined with the _result offset_ clause if desired, limits the number of rows returned in the result set. The _fetch first_ clause can sometimes be useful for retrieving only a few rows from an otherwise large result set, usually in combination with an `ORDER BY` clause. The use of this clause can give efficiency benefits. In addition, it can make programming the application simpler.
+
+  - Syntax:
+
+    ```
+    OFFSET { integer-literal | ? } {ROW | ROWS}
+
+    FETCH { FIRST | NEXT } [integer-literal | ? ] {ROW | ROWS} ONLY
+    ```
+
+    - `ROW` is synonymous with `ROWS` and `FIRST` is synonymous with `NEXT`.
+
+    - For the _result offset_ clause the integer literal (or dynamic parameter) must be equal to 0 (default if the clause is not given), or positive. If it is larger than the number of rows in the underlying result set, no rows are returned.
+
+    - For the _fetch first_ clause, the literal (or dynamic parameter) must be 1 or higher. The literal can be omitted, in which case it defaults to 1. If the clause is omitted entirely, all rows (or those rows remaining if a _result offset_ clause is also given) will be returned.
+
+  - Examples
+
+    ```
+    -- Fetch the first row of T
+    SELECT * FROM T FETCH FIRST ROW ONLY
+
+    -- Sort T using column I, then fetch rows 11 through 20 of the sorted
+    --   rows (inclusive)
+    SELECT * FROM T ORDER BY I OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY
+
+    -- Skip the first 100 rows of T
+    -- If the table has fewer than 101 records, an empty result set is
+    --   returned
+    SELECT * FROM T OFFSET 100 ROWS
+
+    JDBC:
+    PreparedStatement p =
+        con.prepareStatement("SELECT * FROM T ORDER BY I OFFSET ? ROWS");
+    p.setInt(1, 100);
+    ResultSet rs = p.executeQuery();
+
+    ```
+
+    - Note: Make sure to specify the ORDER BY clause if you expect to retrieve a sorted result set. If you do not use an ORDER BY clause, the result set that is retrieved will typically have the order in which the records were inserted.
+
+- `USING` clause
+
+  - The `USING` clause specifies which columns to test for equality when two tables are joined. It can be used instead of an `ON` clause in the `JOIN operations` that have an explicit join clause.
+
+  - Syntax:
+
+    ```
+    USING ( Simple-column-Name [ , Simple-column-Name ]* )
+    ```
+
+    - The columns listed in the `USING` clause must be present in both of the two tables being joined. The `USING` clause will be transformed to an ON clause that checks for equality between the named columns in the two tables.
+
+    - When a `USING` clause is specified, an asterisk (`*`) in the select list of the query will be expanded to the following list of columns (in this order):
+
+      - All the columns in the USING clause
+      - All the columns of the first (left) table that are not specified in the USING clause
+      - All the columns of the second (right) table that are not specified in the USING clause
+
+    - An asterisk qualified by a table name (for example, `COUNTRIES.*`) will be expanded to every column of that table that is not listed in the USING clause.
+
+    - If a column in the `USING` clause is referenced without being qualified by a table name, the column reference points to the column in the first (left) table if the join is an `INNER JOIN` or a `LEFT OUTER JOIN`. If it is a `RIGHT OUTER JOIN`, unqualified references to a column in the `USING` clause point to the column in the second (right) table.
+
+  - Examples:
+
+    - The following query performs an inner join between the `COUNTRIES` table and the `CITIES` table on the condition that `COUNTRIES.COUNTRY` is equal to `CITIES.COUNTRY`:
+
+      ```
+      SELECT * FROM COUNTRIES JOIN CITIES
+          USING (COUNTRY)
+      ```
+
+    - The next query is similar to the one above, but it has the additional join condition that `COUNTRIES.COUNTRY_ISO_CODE` is equal to `CITIES.COUNTRY_ISO_CODE`:
+
+      ```
+      SELECT * FROM COUNTRIES JOIN CITIES
+          USING (COUNTRY, COUNTRY_ISO_CODE)
+      ```
+
+- `WHERE` clause
+
+  - A `WHERE` clause is an optional part of a _SelectExpression_, `DELETE` statement, or `UPDATE` statement. The `WHERE` clause lets you select rows based on a boolean expression. Only rows for which the expression evaluates to `TRUE` are returned in the result, or, in the case of a `DELETE` statement, deleted, or, in the case of an `UPDATE` statement, updated.
+
+  - Syntax:
+
+    ```
+    WHERE Boolean expression
+    ```
+
+    - Boolean expressions are allowed in the `WHERE` clause. Most of the general expressions listed in `Table of general expressions`, can result in a boolean value.
+    - In addition, there are the more common boolean expressions. Specific boolean operators listed in Table 10, take one or more operands; the expressions return a boolean value.
+
+  - Example
+
+    ```
+    -- find the flights where no business-class seats have
+    -- been booked
+    SELECT *
+    FROM FlightAvailability
+    WHERE business_seats_taken IS NULL
+    OR business_seats_taken = 0
+    -- Join the EMP_ACT and EMPLOYEE tables
+    -- select all the columns from the EMP_ACT table and
+    -- add the employee's surname (LASTNAME) from the EMPLOYEE table
+    -- to each row of the result.
+    SELECT SAMP.EMP_ACT.*, LASTNAME
+      FROM SAMP.EMP_ACT, SAMP.EMPLOYEE
+      WHERE EMP_ACT.EMPNO = EMPLOYEE.EMPNO
+    -- Determine the employee number and salary of sales representatives
+    -- along with the average salary and head count of their departments.
+    -- This query must first create a new-column-name specified in the AS clause
+    -- which is outside the fullselect (DINFO)
+    -- in order to get the AVGSALARY and EMPCOUNT columns,
+    -- as well as the DEPTNO column that is used in the WHERE clause
+    SELECT THIS_EMP.EMPNO, THIS_EMP.SALARY, DINFO.AVGSALARY, DINFO.EMPCOUNT
+    FROM EMPLOYEE THIS_EMP,
+      (SELECT OTHERS.WORKDEPT AS DEPTNO,
+              AVG(OTHERS.SALARY) AS AVGSALARY,
+              COUNT(*) AS EMPCOUNT
+        FROM EMPLOYEE OTHERS
+        GROUP BY OTHERS.WORKDEPT
+      )AS DINFO
+    WHERE THIS_EMP.JOB = 'SALESREP'
+        AND THIS_EMP.WORKDEPT = DINFO.DEPTNO
+    ```
+
+- `WHERE CURRENT OF` clause
+
+  - The `WHERE CURRENT OF` clause is a clause in some `UPDATE` and `DELETE` statements. It allows you to perform positioned updates and deletes on updatable cursors. For more information about updatable cursors, see `SELECT statement`.
+
+  - Syntax:
+
+    ```
+    WHERE CURRENT OF cursor-Name
+    ```
+
+  - Example:
+
+    ```
+    Statement s = conn.createStatement();
+    s.setCursorName("AirlinesResults");
+    ResultSet rs = conn.executeQuery(
+        "SELECT Airline, basic_rate " +
+        "FROM Airlines FOR UPDATE OF basic_rate");
+    Statement s2 = conn.createStatement();
+    s2.executeUpdate("UPDATE Airlines SET basic_rate = basic_rate " +
+        "+ .25 WHERE CURRENT OF AirlinesResults");
+    ```
+
 ### 5.4. Types of Constraints
+
+- NOT NULL Constraint
+
+  - By default, a column can hold NULL values.
+
+  - The NOT NULL constraint enforces a column to NOT accept NULL values.
+
+  - This enforces a field to always contain a value, which means that you cannot insert a new record, or update a record without adding a value to this field.
+
+  - SQL NOT NULL on CREATE TABLE
+
+    - The following SQL ensures that the "ID", "LastName", and "FirstName" columns will NOT accept NULL values when the "Persons" table is created:
+
+    ```
+    CREATE TABLE Persons (
+        ID int NOT NULL,
+        LastName varchar(255) NOT NULL,
+        FirstName varchar(255) NOT NULL,
+        Age int
+    );
+    ```
+
+  - SQL NOT NULL on ALTER TABLE
+
+    - To create a NOT NULL constraint on the "Age" column when the "Persons" table is already created, use the following SQL:
+
+      - SQL Server / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ALTER COLUMN Age int NOT NULL;
+        ```
+
+      - My SQL / Oracle (prior version 10G):
+
+        ```
+        ALTER TABLE Persons
+        MODIFY COLUMN Age int NOT NULL;
+        ```
+
+      - Oracle 10G and later:
+
+        ```
+        ALTER TABLE Persons
+        MODIFY Age int NOT NULL;
+        ```
+
+- UNIQUE Constraint
+
+  - The UNIQUE constraint ensures that all values in a column are different.
+
+  - Both the UNIQUE and PRIMARY KEY constraints provide a guarantee for uniqueness for a column or set of columns.
+
+  - A PRIMARY KEY constraint automatically has a UNIQUE constraint.
+
+  - However, you can have many UNIQUE constraints per table, but only one PRIMARY KEY constraint per table.
+
+  - SQL UNIQUE Constraint on CREATE TABLE
+
+    - The following SQL creates a UNIQUE constraint on the "ID" column when the "Persons" table is created:
+
+    - SQL Server / Oracle / MS Access:
+
+      ```
+      CREATE TABLE Persons (
+          ID int NOT NULL UNIQUE,
+          LastName varchar(255) NOT NULL,
+          FirstName varchar(255),
+          Age int
+      );
+      ```
+
+    - MySQL:
+
+      ```
+      CREATE TABLE Persons (
+          ID int NOT NULL,
+          LastName varchar(255) NOT NULL,
+          FirstName varchar(255),
+          Age int,
+          UNIQUE (ID)
+      );
+      ```
+
+    - To name a UNIQUE constraint, and to define a UNIQUE constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            CONSTRAINT UC_Person UNIQUE (ID,LastName)
+        );
+        ```
+
+  - SQL UNIQUE Constraint on ALTER TABLE
+
+    - To create a UNIQUE constraint on the "ID" column when the table is already created, use the following SQL:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD UNIQUE (ID);
+        ```
+
+    - To name a UNIQUE constraint, and to define a UNIQUE constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD CONSTRAINT UC_Person UNIQUE (ID,LastName);
+        ```
+
+  - DROP a UNIQUE Constraint
+
+    - To drop a UNIQUE constraint, use the following SQL:
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Persons
+        DROP INDEX UC_Person;
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        DROP CONSTRAINT UC_Person;
+        ```
+
+- PRIMARY KEY Constraint
+
+  - SQL PRIMARY KEY Constraint
+
+    - The PRIMARY KEY constraint uniquely identifies each record in a table.
+
+    - Primary keys must contain UNIQUE values, and cannot contain NULL values.
+
+    - A table can have only ONE primary key; and in the table, this primary key can consist of single or multiple columns (fields).
+
+  - SQL PRIMARY KEY on CREATE TABLE
+
+    - The following SQL creates a PRIMARY KEY on the "ID" column when the "Persons" table is created:
+
+      - MySQL:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            PRIMARY KEY (ID)
+        );
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL PRIMARY KEY,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int
+        );
+        ```
+
+    - To allow naming of a PRIMARY KEY constraint, and for defining a PRIMARY KEY constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)
+        );
+        ```
+
+        - Note: In the example above there is only ONE PRIMARY KEY (PK_Person). However, the VALUE of the primary key is made up of TWO COLUMNS (ID + LastName).
+
+  - SQL PRIMARY KEY on ALTER TABLE
+
+    - To create a PRIMARY KEY constraint on the "ID" column when the table is already created, use the following SQL:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD PRIMARY KEY (ID);
+        ```
+
+    - To allow naming of a PRIMARY KEY constraint, and for defining a PRIMARY KEY constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD CONSTRAINT PK_Person PRIMARY KEY (ID,LastName);
+        ```
+
+      - Note: If you use ALTER TABLE to add a primary key, the primary key column(s) must have been declared to not contain NULL values (when the table was first created).
+
+  - DROP a PRIMARY KEY Constraint
+
+    - To drop a PRIMARY KEY constraint, use the following SQL:
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Persons
+        DROP PRIMARY KEY;
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        DROP CONSTRAINT PK_Person;
+        ```
+
+- FOREIGN KEY Constraint
+
+  - SQL FOREIGN KEY Constraint
+
+    - The FOREIGN KEY constraint is used to prevent actions that would destroy links between tables.
+
+    - A FOREIGN KEY is a field (or collection of fields) in one table, that refers to the PRIMARY KEY in another table.
+
+    - The table with the foreign key is called the child table, and the table with the primary key is called the referenced or parent table.
+
+    - Look at the following two tables:
+
+      - Persons Table
+
+        | PersonID | LastName  | FirstName | Age |
+        | -------- | --------- | --------- | --- |
+        | 1        | Hansen    | Ola       | 30  |
+        | 2        | Svendson  | Tove      | 23  |
+        | 3        | Pettersen | Kari      | 20  |
+
+      - Orders Table
+
+        | OrderID | OrderNumber | PersonID |
+        | ------- | ----------- | -------- |
+        | 1       | 77895       | 3        |
+        | 2       | 44678       | 3        |
+        | 3       | 22456       | 2        |
+        | 4       | 24562       | 1        |
+
+      - Notice that the "PersonID" column in the "Orders" table points to the "PersonID" column in the "Persons" table.
+
+      - The "PersonID" column in the "Persons" table is the PRIMARY KEY in the "Persons" table.
+
+      - The "PersonID" column in the "Orders" table is a FOREIGN KEY in the "Orders" table.
+
+      - The FOREIGN KEY constraint prevents invalid data from being inserted into the foreign key column, because it has to be one of the values contained in the parent table.
+
+  - SQL FOREIGN KEY on CREATE TABLE
+
+    - The following SQL creates a FOREIGN KEY on the "PersonID" column when the "Orders" table is created:
+
+      - MySQL:
+
+        ```
+        CREATE TABLE Orders (
+            OrderID int NOT NULL,
+            OrderNumber int NOT NULL,
+            PersonID int,
+            PRIMARY KEY (OrderID),
+            FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+        );
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Orders (
+            OrderID int NOT NULL PRIMARY KEY,
+            OrderNumber int NOT NULL,
+            PersonID int FOREIGN KEY REFERENCES Persons(PersonID)
+        );
+        ```
+
+    - To allow naming of a FOREIGN KEY constraint, and for defining a FOREIGN KEY constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Orders (
+            OrderID int NOT NULL,
+            OrderNumber int NOT NULL,
+            PersonID int,
+            PRIMARY KEY (OrderID),
+            CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID)
+            REFERENCES Persons(PersonID)
+        );
+        ```
+
+  - SQL FOREIGN KEY on ALTER TABLE
+
+    - To create a FOREIGN KEY constraint on the "PersonID" column when the "Orders" table is already created, use the following SQL:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Orders
+        ADD FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+        ```
+
+    - To allow naming of a FOREIGN KEY constraint, and for defining a FOREIGN KEY constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Orders
+        ADD CONSTRAINT FK_PersonOrder
+        FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+        ```
+
+  - DROP a FOREIGN KEY Constraint
+
+    - To drop a FOREIGN KEY constraint, use the following SQL:
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Orders
+        DROP FOREIGN KEY FK_PersonOrder;
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Orders
+        DROP CONSTRAINT FK_PersonOrder;
+        ```
+
+- CHECK Constraint
+
+  - SQL CHECK Constraint
+
+    - The CHECK constraint is used to limit the value range that can be placed in a column.
+
+    - If you define a CHECK constraint on a column it will allow only certain values for this column.
+
+    - If you define a CHECK constraint on a table it can limit the values in certain columns based on values in other columns in the row.
+
+  - SQL CHECK on CREATE TABLE
+
+    - The following SQL creates a CHECK constraint on the "Age" column when the "Persons" table is created. The CHECK constraint ensures that the age of a person must be 18, or older:
+
+      - MySQL:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            CHECK (Age>=18)
+        );
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int CHECK (Age>=18)
+        );
+        ```
+
+      - To allow naming of a CHECK constraint, and for defining a CHECK constraint on multiple columns, use the following SQL syntax:
+
+        - MySQL / SQL Server / Oracle / MS Access:
+
+          ```
+          CREATE TABLE Persons (
+              ID int NOT NULL,
+              LastName varchar(255) NOT NULL,
+              FirstName varchar(255),
+              Age int,
+              City varchar(255),
+              CONSTRAINT CHK_Person CHECK (Age>=18 AND City='Sandnes')
+          );
+          ```
+
+  - SQL CHECK on ALTER TABLE
+
+    - To create a CHECK constraint on the "Age" column when the table is already created, use the following SQL:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD CHECK (Age>=18);
+        ```
+
+    - To allow naming of a CHECK constraint, and for defining a CHECK constraint on multiple columns, use the following SQL syntax:
+
+      - MySQL / SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes');
+        ```
+
+  - DROP a CHECK Constraint
+
+    - To drop a CHECK constraint, use the following SQL:
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        DROP CONSTRAINT CHK_PersonAge;
+        ```
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Persons
+        DROP CHECK CHK_PersonAge;
+        ```
+
+- DEFAULT Constraint
+
+  - SQL DEFAULT Constraint
+
+    - The DEFAULT constraint is used to set a default value for a column.
+
+    - The default value will be added to all new records, if no other value is specified.
+
+  - SQL DEFAULT on CREATE TABLE
+
+    - The following SQL sets a DEFAULT value for the "City" column when the "Persons" table is created:
+
+      - My SQL / SQL Server / Oracle / MS Access:
+
+        ```
+        CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            City varchar(255) DEFAULT 'Sandnes'
+        );
+        ```
+
+    - The DEFAULT constraint can also be used to insert system values, by using functions like GETDATE():
+
+      ```
+      CREATE TABLE Orders (
+          ID int NOT NULL,
+          OrderNumber int NOT NULL,
+          OrderDate date DEFAULT GETDATE()
+      );
+      ```
+
+  - SQL DEFAULT on ALTER TABLE
+
+    - To create a DEFAULT constraint on the "City" column when the table is already created, use the following SQL:
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Persons
+        ALTER City SET DEFAULT 'Sandnes';
+        ```
+
+      - SQL Server:
+
+        ```
+        ALTER TABLE Persons
+        ADD CONSTRAINT df_City
+        DEFAULT 'Sandnes' FOR City;
+        ```
+
+      - MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ALTER COLUMN City SET DEFAULT 'Sandnes';
+        ```
+
+      - Oracle:
+
+        ```
+        ALTER TABLE Persons
+        MODIFY City DEFAULT 'Sandnes';
+        ```
+
+  - DROP a DEFAULT Constraint
+
+    - To drop a DEFAULT constraint, use the following SQL:
+
+      - MySQL:
+
+        ```
+        ALTER TABLE Persons
+        ALTER City DROP DEFAULT;
+        ```
+
+      - SQL Server / Oracle / MS Access:
+
+        ```
+        ALTER TABLE Persons
+        ALTER COLUMN City DROP DEFAULT;
+        ```
+
+      - SQL Server:
+
+        ```
+        ALTER TABLE Persons
+        ALTER COLUMN City DROP DEFAULT;
+        ```
+
+- CREATE INDEX Statement
+
+  - SQL CREATE INDEX Statement
+
+    - The CREATE INDEX statement is used to create indexes in tables.
+
+    - Indexes are used to retrieve data from the database more quickly than otherwise. The users cannot see the indexes, they are just used to speed up searches/queries.
+
+    - Note: Updating a table with indexes takes more time than updating a table without (because the indexes also need an update). So, only create indexes on columns that will be frequently searched against.
+
+    - CREATE INDEX Syntax
+
+      - Creates an index on a table. Duplicate values are allowed:
+
+      ```
+      CREATE INDEX index_name
+      ON table_name (column1, column2, ...);
+      ```
+
+    - CREATE UNIQUE INDEX Syntax
+
+      - Creates a unique index on a table. Duplicate values are not allowed:
+
+      ```
+      CREATE UNIQUE INDEX index_name
+      ON table_name (column1, column2, ...);
+      ```
+
+    - Note: The syntax for creating indexes varies among different databases. Therefore: Check the syntax for creating indexes in your database.
+
+  - CREATE INDEX Example
+
+    - The SQL statement below creates an index named "idx_lastname" on the "LastName" column in the "Persons" table:
+
+      ```
+      CREATE INDEX idx_lastname
+      ON Persons (LastName);
+      ```
+
+    - If you want to create an index on a combination of columns, you can list the column names within the parentheses, separated by commas:
+
+      ```
+      CREATE INDEX idx_pname
+      ON Persons (LastName, FirstName);
+      ```
+
+  - DROP INDEX Statement
+
+    - The DROP INDEX statement is used to delete an index in a table.
+
+      - MS Access:
+
+        ```
+        DROP INDEX index_name ON table_name;
+        ```
+
+      - SQL Server:
+
+        ```
+        DROP INDEX table_name.index_name;
+        ```
+
+      - DB2/Oracle:
+
+        ```
+        DROP INDEX index_name;
+        ```
+
+      - MySQL:
+
+        ```
+        ALTER TABLE table_name
+        DROP INDEX index_name;
+        ```
 
 ## 6. Relational Algebra
 
