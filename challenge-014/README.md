@@ -5663,15 +5663,272 @@
 
 ### 6.1. Basics of Relational Algebra
 
+- Relational Algebra
+
+  - In `database theory`, relational algebra is a theory that uses `algebraic structures` with a `well-founded semantics` for modeling data, and defining queries on it.
+
+    - Database theory encapsulates a broad range of topics related to the study and research of the theoretical realm of databases and database management systems.
+
+    - In mathematics, an algebraic structure consists of a nonempty set A, a collection of operations on A, and a finite set of identities, known as axioms, that these operations must satisfy.
+
+    - In logic programming, the well-founded semantics is one definition of how we can make conclusions from a set of logical rules. In logic programming, we give a computer a set of facts, and a set of "inference rules" about how these facts relate.
+
+  - The main application of relational algebra is to provide a theoretical foundation for `relational databases`, particularly `query languages` for such databases, chief among which is `SQL`. Relational databases store tabular data represented as `relations`. Queries over relational databases often likewise return tabular data represented as relations.
+
+    - Query languages, data query languages or database query languages (DQL) are computer languages used to make queries in databases and information systems. A well known example is the Structured Query Language (SQL).
+
+    - Relation
+
+      - In database theory, a relation, as originally defined by E. F. Codd,[1] is a set of tuples (d1, d2, ..., dn), where each element dj is a member of Dj, a data domain.
+
+      - ![](images/6.1_3_Relational_database_terms.svg)
+      - Examples
+
+        - Below is an example of a relation having three named attributes: 'ID' from the domain of integers, and 'Name' and 'Address' from the domain of strings:
+
+        | ID (Integer) | Name (String)      | Address (String)   |
+        | ------------ | ------------------ | ------------------ |
+        | 102          | Yonezawa Akinori   | Naha, Okinawa      |
+        | 202          | Nilay Patel        | Sendai, Miyagi     |
+        | 104          | Murata Makoto      | Kumamoto, Kumamoto |
+        | 152          | Matsumoto Yukihiro | Okinawa, Okinawa   |
+
+        - A predicate for this relation, using the attribute names to denote free variables, might be "Employee number ID is known as Name and lives at Address". Examination of the relation tells us that there are just four tuples for which the predicate holds true. So, for example, employee 102 is known only by that name, Yonezawa Akinori, and does not live anywhere else but in Naha, Okinawa. Also, apart from the four employees shown, there is no other employee who has both a name and an address.
+
+  - The main purpose of the relational algebra is to define operators that transform one or more input relations to an output relation. Given that these operators accept relations as input and produce relations as output, they can be combined and used to express potentially complex queries that transform potentially many input relations (whose data are stored in the database) into a single output relation (the query results).
+
+  - Unary operators accept as input a single relation; examples include operators to filter certain attributes (columns) or tuples (rows) from an input relation.
+
+  - Binary operators accept as input two relations; such operators combine the two input relations into a single output relation by, for example, taking all tuples found in either relation, removing tuples from the first relation found in the second relation, extending the tuples of the first relation with tuples in the second relation matching certain conditions, and so forth.
+
+- What is Relational Algebra?
+
+  - Relational algebra operations work on one or more relations to define another relation without changing the original relations.
+  - Both operands and results are relations, so output from one operation can become input to another operation.
+  - Allows expressions to be nested, just as in arithmetic. This property is called `closure`.
+
+- Operations of Relational Algebra
+
+  - Five basic operations in relational algebra: Selection, Projection, Cartesian product, Union, and Set Difference.
+  - These perform most of the data retrieval operations needed.
+  - Also have Join, Intersection, and Division operations, which can be expressed in terms of 5 basic operations.
+
+  - ![](images/6.1_1.png)
+  - ![](images/6.1_2.png)
+
 ### 6.2. Projection
 
-### 6.3. Selection
+- ![](images/6.2_1.png)
+
+  - Works on a single relation R and defines a relation that contains a vertical subset of R, extracting the values of specified attributes and eliminating duplicates.
+
+- Example
+
+  - Produce a list of salaries for all staff, showing only staffNo, fName, lName, and salary details.
+
+  - ![](images/6.2_2.png)
+
+### 6.3. Selection (or Restriction)
+
+- ![](images/6.3_1.png)
+
+  - Works on a single relation R and defines a relation that contains only those tuples(rows) of R that satisfy the specified condition(_predicate_).
+
+- Example
+
+  - List all staff with a salary greater than £ 10,000.
+    - ![](images/6.3.2.png)
 
 ### 6.4. Renaming and Union
 
+- Rename opeartion
+
+  - It is used to assign a new name to a relation and is denoted by ρ (rho).
+  - Syntax:
+    ```
+    ρnewname (tablename or expression)
+    ```
+  - Example 1
+
+    - The student table is renamed with newstudent with the help of the following command −
+      ```
+      ρnewstudent (student)
+      ```
+
+  - Example 2
+
+    - The name, branch column of student table are renamed and newbranch respectively
+
+      ```
+      ρnewname,newbranch(∏name,branch( student))
+      ```
+
+  - Binary operations are applied on two compatible relations.
+
+  - Two relations R1, R2 are to be compatible if they are of the same degree and the domains of corresponding attributes are the same.
+
+  - The Rho in DDL used for name of relation and in DML used for name of attributes.
+
+  - Types of RENAME
+
+    - Renaming can be used by three methods, which are as follows −
+
+      - Changing name of the relation.
+
+      - Changing name of the attribute.
+
+      - Changing both.
+
+- Union
+
+  - R ∪ S
+
+    - Union of two relations R and S defines a relation that contains all the tuples of R, or S, or both R and S, duplicate tuples being eliminated.
+    - R and S must be union-compatible.
+
+  - If R and S have 𝐼 and 𝐽 tuples, respectively, union is obtained by concatenating them into one relation with a maximum of (𝐼 + 𝐽) tuples.
+
+  - Example
+
+    - List all cities where there is either a branch office or a property for rent.
+
+      ∏cᵢₜy (Branch) ∪ ∏cᵢₜy (PropertyForRent)
+
+    - ![](images/6.4.1.png)
+
 ### 6.5. Intersection and Assignment
 
+- Insersection
+
+  - R ∩ S
+    - Defines a relation consisting of the set of all tuples that are in both R and S.
+    - R and S must be union-compatible.
+  - Expressed using basic operations:
+
+    ```
+    R ∩ S = R - (R - S)
+    ```
+
+  - Example
+
+    - List all cities where there is both a branch office and at least one property for rent.
+
+      ```
+      ∏cᵢₜy (Branch) ∩ ∏cᵢₜy (PropertyForRent)
+      ```
+
+      - ![](images/6.5.1.png)
+
+- Assignment
+
+  - The assignment operation (←) provides a convenient way to express complex queries.
+    - Write query as a sequential program consisting of
+      - a series of assignments
+      - followed by an expression whose value is displayed as a result of the query.
+    - Assignment must always be made to a temporary relation variable.
+
 ### 6.6. Cartesian Product
+
+- R X S
+
+  - Defines a relation that is the concatenation of every tuple of relation R with every tuple of relation S.
+
+  - Example
+
+    - List the names and comments of all clients who have viewed a proeprty for rent.
+
+      - ![](images/6.6_1.png)
+
+    - Cartesian Product and Selection - An Example
+      - Use selection operation to extract those tuples where `Client.clientNo = Viewing.clientNo`.
+        - ![](images/6.6_2.png)
+      - Cartesian product and Selection can be reduced to a single operation called a _Join_.
+
+### 6.7. Set Difference
+
+- R - S
+
+  - Defines a relation consisting of the tuples that are in relation R, but not in S.
+  - R and S must be union-compatible.
+
+- Example
+
+  - List all cities where there is a branch office but no properties for rent.
+
+  - ![](images/6.7_1.png)
+
+### 6.8. Joins and join-like operators
+
+- Natural join (⋈)
+
+  - Natural join (⋈) is a binary operator that is written as (R ⋈ S) where R and S are relations. The result of the natural join is the set of all combinations of tuples in R and S that are equal on their common attribute names. For an example consider the tables _Employee_ and _Dept_ and their natural join:
+
+    - ![](images/6.8_1.png)
+
+    - Note that neither the employee named `Mary` nor the `Production` department appear in the result.
+
+  - More formally the semantics of the natural join are defined as follows:
+
+    - ![](images/6.8_2.png)
+
+      - where Fun(t) is a `predicate` that is true for a relation t (in the mathematical sense) iff t is a function (that is, t does not map any attribute to multiple values). It is usually required that R and S must have at least one common attribute, but if this constraint is omitted, and R and S have no common attributes, then the natural join becomes exactly the Cartesian product.
+
+- θ-join and equijoin
+
+  - Consider tables Car and Boat which list models of cars and boats and their respective prices. Suppose a customer wants to buy a car and a boat, but she does not want to spend more money for the boat than for the car. The θ-join (⋈θ) on the predicate CarPrice ≥ BoatPrice produces the flattened pairs of rows which satisfy the predicate. When using a condition where the attributes are equal, for example Price, then the condition may be specified as Price=Price or alternatively (Price) itself.
+
+    - ![](images/6.8_3.png)
+
+  - In order to combine tuples from two relations where the combination condition is not simply the equality of shared attributes it is convenient to have a more general form of join operator, which is the θ-join (or theta-join). The θ-join is a binary operator that is written as
+    ![](images/6.8_4.png)
+    where a and b are attribute names, θ is a binary relational operator in the set {<, ≤, =, ≠, >, ≥}, υ is a value constant, and R and S are relations. The result of this operation consists of all combinations of tuples in R and S that satisfy θ. The result of the θ-join is defined only if the headers of S and R are disjoint, that is, do not contain a common attribute.
+
+  - The simulation of this operation in the fundamental operations is therefore as follows:
+
+    - ![](images/6.8_5.png)
+
+  - In case the operator θ is the equality operator (=) then this join is also called an `equijoin`.
+
+- Semijoin (⋉ and ⋊)
+
+  - The left semijoin is a joining similar to the natural join and written as R ⋉ S where R and S are relations.The result is the set of all tuples in R for which there is a tuple in S that is equal on their common attribute names. The difference from a natural join is that other columns of S do not appear. For example, consider the tables Employee and Dept and their semijoin:
+
+    - ![](images/6.8_6.png)
+
+  - ![](images/6.8_7.png)
+
+- Antijoin (▷)
+
+  - The antijoin, written as R ▷ S where R and S are relations, is similar to the semijoin, but the result of an antijoin is only those tuples in R for which there is no tuple in S that is equal on their common attribute names.
+
+  - For an example consider the tables Employee and Dept and their antijoin:
+
+    - ![](images/6.8_8.png)
+
+  - The antijoin is formally defined as follows:
+    R ▷ S = { t : t ∈ R ∧ ¬∃s ∈ S(Fun (t ∪ s)) }
+    or
+    R ▷ S = { t : t ∈ R, there is no tuple s of S that satisfies Fun (t ∪ s) }
+
+    where Fun (t ∪ s) is as in the definition of natural join.
+
+  - The antijoin can also be defined as the complement of the semijoin, as follows:
+
+    R ▷ S = R − R ⋉ S
+
+    - Given this, the antijoin is sometimes called the anti-semijoin, and the antijoin operator is sometimes written as semijoin symbol with a bar above it, instead of ▷.
+
+- Division (÷)
+
+  - The division is a binary operation that is written as R ÷ S. Division is not implemented directly in SQL. The result consists of the restrictions of tuples in R to the attribute names unique to R, i.e., in the header of R but not in the header of S, for which it holds that all their combinations with tuples in S are present in R. For an example see the tables Completed, DBProject and their division:
+
+    - ![](images/6.8_9.png)
+
+  - If DBProject contains all the tasks of the Database project, then the result of the division above contains exactly the students who have completed both of the tasks in the Database project. More formally the semantics of the division is defined as follows:
+
+    R ÷ S = { t[a1,...,an] : t ∈ R ∧ ∀s ∈ S ( (t[a1,...,an] ∪ s) ∈ R) }
+
+    where {a1,...,an} is the set of attribute names unique to R and t[a1,...,an] is the restriction of t to this set. It is usually required that the attribute names in the header of S are a subset of those of R because otherwise the result of the operation will always be empty.
 
 ## 7. Sub Queries and Normalization
 
