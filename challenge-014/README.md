@@ -5934,19 +5934,607 @@
 
 ### 7.1. Introduction to Sub Query
 
+- What is subquery in SQL?
+
+  - A subquery is a SQL query nested inside a larger query.
+
+    - A subquery may occur in :
+
+      - A `SELECT` clause
+      - A `FROM` clause
+      - A `WHERE` clause
+
+    - The subquery can be nested inside a `SELECT`, `INSERT`, `UPDATE`, or `DELETE` statement or inside another subquery.
+
+    - A subquery is usually added within the `WHERE` Clause of another SQL `SELECT` statement.
+
+    - You can use the comparison operators, such as `>`, `<`, or `=`. The comparison operator can also be a multiple-row operator, such as `IN`, `ANY`, or `ALL`.
+
+    - A subquery is also called an `inner query` or `inner select`, while the statement containing a subquery is also called an `outer query` or `outer select`.
+
+    - The inner query executes first before its parent query so that the results of an inner query can be passed to the outer query.
+
+  - You can use a subquery in a `SELECT`, `INSERT`, `DELETE`, or `UPDATE` statement to perform the following tasks:
+
+    - Compare an expression to the result of the query.
+    - Determine if an expression is included in the results of the query.
+    - Check whether the query selects any rows.
+
+- Syntax:
+
+  ```
+  SELECT select_list
+  FROM table
+  WHERE expr operator
+                ( SELECT select_list
+                  FROM table );
+  ```
+
+  - The subquery (inner query) executes once before the main query (outer query) executes.
+  - The main query (outer query) use the subquery result.
+
+- SQL Subqueries Example :
+
+  - We have the following two tables `student` and `marks` with common field `StudentID`.
+
+    - student:
+
+      | StudentId | Name     |
+      | --------- | -------- |
+      | V001      | Abe      |
+      | V002      | Abhay    |
+      | V003      | Acelin   |
+      | V004      | Adelphos |
+
+    - marks
+
+      | StudentID | Total_marks |
+      | --------- | ----------- |
+      | V001      | 95          |
+      | V002      | 80          |
+      | V003      | 74          |
+      | V004      | 81          |
+
+  - Now we want to write a query to identify all students who get better marks than that of the student who's StudentID is 'V002', but we do not know the marks of 'V002'.
+
+    - To solve the problem, we require two queries. One query returns the marks (stored in Total_marks field) of 'V002' and a second query identifies the students who get better marks than the result of the first query.
+
+    - First query:
+
+      ```
+      SELECT *
+      FROM `marks`
+      WHERE studentid = 'V002';
+      ```
+
+      - Query result:
+
+        | StudentID | Total_marks |
+        | --------- | ----------- |
+        | V002      | 80          |
+
+        - The result of the query is 80.
+
+    - Using the result of this query, here we have written another query to identify the students who get better marks than 80. Here is the query :
+
+      ```
+      SELECT a.studentid, a.name, b.total_marks
+      FROM student a, marks b
+      WHERE a.studnetid = b.studentid
+      AND b.total_marks > 80;
+      ```
+
+    - Relational Algebra Expression:
+
+      - ![](images/7.1_1-relational-algebra-expression.png)
+
+    - Relational Algebra Tree:
+
+      - ![](images/7.1_2-relational-algebra-tree-diagram.png)
+
+    - Query result:
+
+      | studentid | name     | total_marks |
+      | --------- | -------- | ----------- |
+      | V001      | Abe      | 95          |
+      | V004      | Adelphos | 81          |
+
+      - Above two queries identified students who get the better number than the student who's StudentID is 'V002' (Abhay).
+
+  - You can combine the above two queries by placing one query inside the other. The subquery (also called the 'inner query') is the query inside the parentheses. See the following code and query result :
+
+    - SQL Code:
+
+      ```
+      SELECT a.studentid, a.name, b.total_marks
+      FROM student a, marks b
+      WHERE a.studnetid = b.studentid AND b.total_marks > (
+        SELECT total_marks
+        FROM marks
+        WHERE studentid = 'V002' );
+      ```
+
+    - Query result:
+
+      | studentid | name     | total_marks |
+      | --------- | -------- | ----------- |
+      | V001      | Abe      | 95          |
+      | V004      | Adelphos | 81          |
+
+    - Pictorial Presentation of SQL Subquery:
+
+      - ![](images/7.1_3-sql-subqueries.gif)
+
+- Subqueries: General Rules
+
+  - A subquery SELECT statement is almost similar to the SELECT statement and it is used to begin a regular or outer query. Here is the syntax of a subquery:
+
+    ```
+    (SELECT [DISTINCT] subquery_select_argument
+    FROM {table_name | view_name}
+    {table_name | view_name} ...
+    [WHERE search_conditions]
+    [GROUP BY aggregate_expression [, aggregate_expression] ...]
+    [HAVING search_conditions])
+    ```
+
+- Subqueries: Guidelines
+
+  - There are some guidelines to consider when using subqueries :
+
+    - A subquery must be enclosed in parentheses.
+    - A subquery must be placed on the right side of the comparison operator.
+    - Subqueries cannot manipulate their results internally, therefore `ORDER BY` clause cannot be added into a subquery. You can use an `ORDER BY` clause in the main `SELECT` statement (outer query) which will be the last clause.
+    - Use single-row operators with single-row subqueries.
+    - If a subquery (inner query) returns a null value to the outer query, the outer query will not return any rows when using certain comparison operators in a `WHERE` clause.
+
+- Type of Subqueries
+
+  - Single row subquery : Returns zero or one row.
+  - Multiple row subquery : Returns one or more rows.
+  - Multiple column subqueries : Returns one or more columns.
+  - Correlated subqueries : Reference one or more columns in the outer SQL statement. The subquery is known as a `correlated subquery` because the subquery is related to the outer SQL statement.
+  - Nested subqueries : Subqueries are placed within another subquery.
+
+- Subqueries with `INSERT` statement
+
+  - Syntax:
+
+    ```
+    INSERT INTO table_name [ (column1 [, column2 ]) ]
+    SELECT [ *|column1 [, column2 ]
+    FROM table1 [, table2 ]
+    [ WHERE VALUE OPERATOR ];
+    ```
+
+    - If we want to insert those orders from 'orders' table which have the advance_amount 2000 or 5000 into 'neworder' table the following SQL can be used:
+
+      - SQL Code:
+
+        ```
+        INSERT INTO neworder
+        SELECT * FROM  orders
+        WHERE advance_amount in(2000,5000);
+        ```
+
+- Subqueries with `UPDATE` statement
+
+  - In a UPDATE statement, you can set new column value equal to the result returned by a single row subquery.
+
+  - Syntax:
+
+    ```
+    UPDATE table  SET column_name = new_value
+    [ WHERE OPERATOR [ VALUE ]
+    (SELECT COLUMN_NAME
+    FROM TABLE_NAME)
+    [ WHERE) ]
+    ```
+
+    - If we want to update that ord_date in 'neworder' table with '15-JAN-10' which have the difference of ord_amount and advance_amount is less than the minimum ord_amount of 'orders' table the following SQL can be used:
+
+      ```
+      UPDATE neworder
+      SET ord_date='15-JAN-10'
+      WHERE ord_amount-advance_amount <
+      (SELECT MIN(ord_amount) FROM orders);
+      ```
+
+- Subqueries with `DELETE` statement
+
+  - Syntax:
+
+    ```
+    DELETE FROM TABLE_NAME
+    [ WHERE OPERATOR [ VALUE ]
+    (SELECT COLUMN_NAME
+    FROM TABLE_NAME)
+    [ WHERE) ]
+    ```
+
+    - If we want to delete those orders from 'neworder' table which advance_amount are less than the maximum advance_amount of 'orders' table, the following SQL can be used:
+
+      ```
+      DELETE FROM neworder
+      WHERE advance_amount <
+      (SELECT MAX(advance_amount) FROM orders);
+      ```
+
 ### 7.2. Building Nested Sub Query
+
+- Nested subqueries
+
+  - A subquery can be nested inside other subqueries. SQL has an ability to nest queries within one another. A subquery is a `SELECT` statement that is nested within another `SELECT` statement and which return intermediate results. SQL executes innermost subquery first, then next level.
+
+- Example -1 : Nested subqueries
+
+  - If we want to retrieve that unique `job_id` and there average salary from the `employees` table which unique `job_id` have a salary is smaller than (the maximum of averages of `min_salary` of each unique `job_id` from the `jobs` table which `job_id` are in the list, picking from (the `job_history` table which is within the `department_id` `50` and `100`)) the following SQL statement can be used :
+
+    - Sample table: employees
+
+      | employee_id | first_name | last_name | email    | phone_number | hire_date | job_id  | salary | commission_pct | manager_id | department_id |
+      | ----------- | ---------- | --------- | -------- | ------------ | --------- | ------- | ------ | -------------- | ---------- | ------------- |
+      | 100         | Steven     | King      | SKING    | 515.123.4567 | 6/17/1987 | AD_PRES | 24000  |                |            | 90            |
+      | 101         | Neena      | Kochhar   | NKOCHHAR | 515.123.4568 | 6/18/1987 | AD_VP   | 17000  |                | 100        | 90            |
+
+    - Sample table: jobs
+
+      | JOB_ID  | JOB_TITLE                     | MIN_SALARY | MAX_SALARY |
+      | ------- | ----------------------------- | ---------- | ---------- |
+      | AD_PRES | President                     | 20000      | 40000      |
+      | AD_VP   | Administration Vice President | 15000      | 30000      |
+
+    - SQL Code:
+
+      - Oracle:
+
+        ```
+        SELECT job_id,AVG(salary)
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) < (
+          SELECT MAX(AVG(min_salary))
+          FROM jobs
+          WHERE job_id IN (
+            SELECT job_id FROM job_history
+            WHERE department_id BETWEEN 50 AND 100
+          )
+          GROUP BY job_id
+        );
+        ```
+
+      - PostgreSQL
+
+        ```
+        SELECT job_id,AVG(salary)
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) < (
+          SELECT MAX(myavg) from (
+            SELECT job_id, AVG(min_salary) as myavg
+            FROM jobs
+            WHERE job_id IN (
+              SELECT job_id FROM job_history
+              WHERE department_id BETWEEN 50 AND 100
+            )
+            GROUP BY job_id
+          ) ss
+        );
+        ```
+
+    - Explanation:
+
+      - This example contains three queries: a nested subquery, a subquery, and the outer query. These parts of queries are runs in that order.
+
+      - At first the nested subquery as follows:
+
+        ```
+        SELECT job_id FROM job_history
+        WHERE department_id BETWEEN 50 AND 100;
+        ```
+
+        - This nested subquery retrieves the job_id(s) from job_history table which is within the department_id 50 and 100.
+
+        - Output:
+
+          | JOB_ID     |
+          | ---------- |
+          | ST_CLERK   |
+          | ST_CLERK   |
+          | IT_PROG    |
+          | SA_REP     |
+          | SA_MAN     |
+          | AD_ASST    |
+          | AC_ACCOUNT |
+
+      - Now the subquery that receives output from the nested subquery stated above.
+
+        ```
+        SELECT MAX(AVG(min_salary))
+        FROM jobs
+        WHERE job_id IN(.....output from the nested subquery......)
+        GROUP BY job_id
+        ```
+
+        - The subquery internally works as follows:
+
+          ```
+          SELECT MAX(AVG(min_salary))
+          FROM jobs
+          WHERE job_id IN ('ST_CLERK','ST_CLERK','IT_PROG','SA_REP','SA_MAN','AD_ASST','AC_ACCOUNT')
+          GROUP BY job_id;
+          ```
+
+          - Output:
+
+            | MAX(AVG(MIN_SALARY)) |
+            | -------------------- |
+            | 10000                |
+
+      - Now the outer query that receives output from the subquery and which also receives the output from the nested subquery stated above.
+
+        ```
+        SELECT job_id,AVG(salary)
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) < (
+          ...output from the subquery (
+            output from the nested subquery
+          )
+          ...
+        )
+        ```
+
+      - The outer query internally works as follows:
+
+        ```
+        SELECT job_id, AVG(salary)
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary)<10000;
+        ```
+
+        - The outer query returns the job_id, average salary of employees that are less than maximum of average of min_salary returned by the previous query
+
+        - Output:
+
+          ```
+          JOB_ID     AVG(SALARY)
+          ---------- -----------
+          IT_PROG           5760
+          AC_ACCOUNT        8300
+          ST_MAN            7280
+          AD_ASST           4400
+          SH_CLERK          3215
+          FI_ACCOUNT        7920
+          PU_CLERK          2780
+          SA_REP            8350
+          MK_REP            6000
+          ST_CLERK          2785
+          HR_REP            6500
+          ```
 
 ### 7.3. Normalization
 
-### 7.4. First Normal Form
+- What Is Normalization in SQL?
 
-### 7.5. Second Normal Form
+  - `Normalization` is the process to eliminate data redundancy and enhance data integrity in the table. Normalization also helps to organize the data in the database. It is a multi-step process that sets the data into tabular form and removes the duplicated data from the relational tables.
 
-### 7.6. Third Normal Form
+  - Normalization organizes the columns and tables of a database to ensure that database integrity constraints properly execute their dependencies. It is a systematic technique of decomposing tables to eliminate data redundancy (repetition) and undesirable characteristics like Insertion, Update, and Deletion anomalies.
 
-### 7.7. Other Normal Forms
+### 7.4. First Normal Form (1NF)
+
+- A table is referred to as being in its `First Normal Form` if `atomicity` of the table is `1`.
+
+- Here, `atomicity` states that a single cell cannot hold multiple values. It must hold only a single-valued attribute.
+
+- The First normal form disallows the multi-valued attribute, composite attribute, and their combinations.
+
+- Example:
+
+  - Below is a students’ record table that has information about student roll number, student name, student course, and age of the student.
+
+    | rollno | name  | course | age |
+    | ------ | ----- | ------ | --- |
+    | 1      | Rahul | c/c++  | 22  |
+
+  - In the studentsrecord table, you can see that the course column has two values. Thus it does not follow the First Normal Form. Now, if you use the First Normal Form to the above table, you get the below table as a result.
+
+    | rollno | name  | course | age |
+    | ------ | ----- | ------ | --- |
+    | 1      | Rahul | c      | 22  |
+    | 1      | Rahul | c++    | 22  |
+
+  - By applying the First Normal Form, you achieve atomicity, and also every column has unique values.
+
+- `Candidate Key`
+
+  - A candidate key is a set of one or more columns that can identify a record uniquely in a table, and YOU can use each candidate key as a `Primary Key`.
+
+    - ![](images/7.4_1_candidate_key.webp)
+
+- `Super Key`
+
+  - Super key is a set of over one key that can identify a record uniquely in a table, and the Primary Key is a subset of Super Key.
+
+    - ![](images/7.4_2_super_key.webp)
+
+### 7.5. Second Normal Form (2NF)
+
+- The first condition for the table to be in Second Normal Form is that the table has to be in First Normal Form. The table should not possess `partial dependency`. The `partial dependency` here means the proper subset of the candidate key should give a non-prime attribute.
+
+- Example:
+
+  - Consider the table `Location`:
+
+    | cust_id | storeid | store_location |
+    | ------- | ------- | -------------- |
+    | 1       | D1      | Toronto        |
+
+  - The `Location` table possesses a composite primary key `cust_id, storeid`. The non-key attribute is `store_location`. In this case, `store_location` only depends on `storeid`, which is a part of the primary key. Hence, this table does not fulfill the second normal form.
+
+  - To bring the table to `Second Normal Form`, you need to split the table into two parts. This will give you the below tables:
+
+    | cust_id | storeid |
+    | ------- | ------- |
+    | 1       | D1      |
+
+    | storeid | store_location |
+    | ------- | -------------- |
+    | D1      | Toronto        |
+
+  - As you have removed the partial functional dependency from the `location` table, the column `store_location` entirely depends on the primary key of that table, `storeid`.
+
+### 7.6. Third Normal Form (3NF)
+
+- The first condition for the table to be in `Third Normal Form` is that the table should be in the Second Normal Form.
+
+- The second condition is that there should be no `transitive dependency` for non-prime attributes, which indicates that non-prime attributes (which are not a part of the candidate key) should not depend on other non-prime attributes in a table. Therefore, a `transitive dependency` is a functional dependency in which A → C (A determines C) indirectly, because of A → B and B → C (where it is not the case that B → A).
+
+- The third Normal Form ensures the reduction of data duplication. It is also used to achieve data integrity.
+
+- Example:
+
+  - Below is a `student` table that has `student id`, `student name`, `subject id`, `subject name`, and `address of the student` as its columns.
+
+    | stu_id | name | subid | sub | address |
+    | ------ | ---- | ----- | --- | ------- |
+    | 1      | Arun | 11    | SQL | Delhi   |
+
+    - In the above student table, stu_id determines subid, and subid determines sub. Therefore, stu_id determines sub via subid. This implies that the table possesses a transitive functional dependency, and it does not fulfill the third normal form criteria.
+
+  - Now to change the table to the third normal form, you need to divide the table as shown below:
+
+    | stu_id | name | subid | address |
+    | ------ | ---- | ----- | ------- |
+    | 1      | Arun | 11    | Delhi   |
+
+    | subid | subject |
+    | ----- | ------- |
+    | 11    | SQL     |
+
+    - As you can see in both the tables, all the non-key attributes are now fully functional, dependent only on the primary key. In the first table, columns name, subid, and addresses only depend on stu_id. In the second table, the sub only depends on subid.
+
+### 7.7. Other Normal Forms (BCNF)
+
+- Boyce Codd Normal Form (BCNF)
+
+  - `Boyce Codd Normal Form` is also known as 3.5 NF. It is the superior version of 3NF and was developed by Raymond F. Boyce and Edgar F. Codd to tackle certain types of anomalies which were not resolved with 3NF.
+
+  - The first condition for the table to be in `Boyce Codd Normal Form` is that the table should be in the third normal form. Secondly, every `Right-Hand Side (RHS)` attribute of the functional dependencies should depend on the `super key` of that particular table.
+
+  - Example:
+
+    - You have a functional dependency `X → Y`. In the particular functional dependency, `X` has to be the part of the super key of the provided table.
+
+    - `subject` table:
+
+      | stuid | subject | professor    |
+      | ----- | ------- | ------------ |
+      | 1     | SQL     | Prof. Mishra |
+
+    - The subject table follows these conditions:
+
+      - Each student can enroll in multiple subjects.
+      - Multiple professors can teach a particular subject.
+      - For each subject, it assigns a professor to the student.
+
+    - In the above table, `student_id` and `subject` together form the primary key because using `student_id` and `subject`; you can determine all the table columns.
+
+    - Another important point to be noted here is that one professor teaches only one subject, but one subject may have two professors.
+
+    - Which exhibit there is a dependency between subject and professor, i.e. subject depends on the professor's name.
+
+    - The table is in 1st Normal form as all the column names are unique, all values are atomic, and all the values stored in a particular column are of the same domain.
+
+    - The table also satisfies the 2nd Normal Form, as there is no Partial Dependency.
+
+    - And, there is no Transitive Dependency; hence, the table also satisfies the 3rd Normal Form.
+
+    - This table follows all the Normal forms except the Boyce Codd Normal Form.
+
+    - As you can see `stuid`, and `subject` forms the primary key, which means the `subject` attribute is a `prime attribute`.
+
+    - However, there exists yet another dependency - `professor → subject`.
+
+    - BCNF does not follow in the table as a `subject` is a prime attribute, the `professor` is a `non-prime` attribute.
+
+    - To transform the table into the `BCNF`, you will divide the table into two parts. One table will hold `stuid` which already exists and the second table will hold a newly created column `profid`.
+
+      | stuid | profid |
+      | ----- | ------ |
+      | 1     | 101    |
+      | 2     | 102    |
+      | 2     | 103    |
+      | 3     | 102    |
+      | 4     | 104    |
+
+    - And in the second table will have the columns profid, subject, and professor, which satisfies the BCNF.
+
+      | profid | subject | professor    |
+      | ------ | ------- | ------------ |
+      | 1      | SQL     | Prof. Mishra |
+      | 2      | Java    | Prof. Anand  |
+      | 2      | C++     | Prof. Kanth  |
+      | 3      | Java    | Prof. James  |
+      | 4      | DBMS    | Prof. Lokesh |
 
 ### 7.8. Correlated Sub Query
+
+- Correlated subquery
+
+  - In a SQL database query, a `correlated subquery` (also known as a `synchronized subquery`) is a subquery (a query nested inside another query) that uses values from the outer query. Because the subquery may be evaluated once for each row processed by the outer query, it can be slow.
+
+  - Here is an example for a typical correlated subquery. In this example, the objective is to find all employees whose salary is above average for their department.
+
+    ```
+    SELECT employee_number, name
+      FROM employees emp
+      WHERE salary > (
+        SELECT AVG(salary)
+          FROM employees
+          WHERE department = emp.department);
+    ```
+
+    - In the above query the outer query is
+
+      ```
+       SELECT employee_number, name
+        FROM employees emp
+        WHERE salary > ...
+      ```
+
+    - and the inner query (the correlated subquery) is
+
+      ```
+       SELECT AVG(salary)
+        FROM employees
+        WHERE department = emp.department
+      ```
+
+    - In the above nested query the inner query has to be re-executed for each employee. (A sufficiently smart implementation may cache the inner query's result on a department-by-department basis, but even in the best case the inner query must be executed once per department.)
+
+  - Correlated subqueries may appear elsewhere besides the `WHERE` clause; for example, this query uses a correlated subquery in the `SELECT` clause to print the entire list of employees alongside the average salary for each employee's department. Again, because the subquery is correlated with a column of the outer query, it must be re-executed for each row of the result.
+
+    ```
+    SELECT
+      employee_number,
+      name,
+      (SELECT AVG(salary)
+          FROM employees
+          WHERE department = emp.department) AS department_average
+      FROM employees emp
+    ```
+
+- Correlated subqueries in the `FROM` clause
+
+  - It is generally meaningless to have a correlated subquery in the FROM clause because the table in the FROM clause is needed to evaluate the outer query, but the correlated subquery in the FROM clause can't be evaluated before the outer query is evaluated, causing a `chicken-and-egg` problem. Specifically, `MariaDB` lists this as a limitation in its documentation.
+
+  - However, in some database systems, it is allowed to use correlated subqueries while joining in the FROM clause, referencing the tables listed before the join using a specified keyword, producing a number of rows in the correlated subquery and joining it to the table on the left. For example, in `PostgreSQL`, adding the keyword `LATERAL` before the right-hand subquery, or in `Microsoft SQL Server`, using the keyword `CROSS APPLY` or `OUTER APPLY` instead of `JOIN` achieves the effect.
+
+- Computation of correlated subqueries
+
+  - A commonly used computational method for a correlated subquery is to unnest it into an equivalent flat query. The algorithm development in this direction has an advantage of low complexity. Because this is a customized approach, existing database systems cannot unrest arbitrary correlated subqueries by following certain general rules. In addition, this approach requires high engineering efforts to implement unnesting algorithms into a database engine. A general computational approach is to directly execute the nested loop by iterating all tuples of the correlated columns from the outer query block and executing the subquery as many times as the number of outer-loop tuples. This simple approach has an advantage of general-purpose because it is not affected by the type of correlated operators or subquery structures. However, it has a high computational complexity. A GPU acceleration approach is used to significantly improve the performance of the nested method of high algorithmic complexity by exploiting massive parallelism and device memory locality on GPU,[4] which accomplishes the goal for both general-purpose software design and implementation and high performance in subquery processing.
 
 ## 8. Joins and Functions
 
