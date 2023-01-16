@@ -7573,12 +7573,676 @@
 
 ### 11.1. Introduction to Triggers
 
+- You can write triggers that fire whenever one of the following operations occurs:
+
+  - 1. DML statements (INSERT, UPDATE, DELETE) on a particular table or view, issued by any user
+
+  - 2. DDL statements (CREATE or ALTER primarily) issued either by a particular schema/user or by any schema/user in the database
+
+  - 3. Database events, such as logon/logoff, errors, or startup/shutdown, also issued either by a particular schema/user or by any schema/user in the database
+
+- Triggers are similar to stored procedures. A trigger stored in the database can include SQL and PL/SQL or Java statements to run as a unit and can invoke stored procedures. However, procedures and triggers differ in the way that they are invoked. A procedure is explicitly run by a user, application, or trigger. Triggers are implicitly fired by Oracle when a triggering event occurs, no matter which user is connected or which application is being used.
+
+- The events that fire a trigger include the following:
+
+  - DML statements that modify data in a table (INSERT, UPDATE, or DELETE)
+
+  - DDL statements
+
+  - System events such as startup, shutdown, and error messages
+
+  - User events such as logon and logoff
+
+- How Triggers Are Used
+
+  - Triggers supplement the standard capabilities of Oracle to provide a highly customized database management system. For example, a trigger can restrict DML operations against a table to those issued during regular business hours. You can also use triggers to:
+
+    - Automatically generate derived column values
+
+    - Prevent invalid transactions
+
+    - Enforce complex security authorizations
+
+    - Enforce referential integrity across nodes in a distributed database
+
+    - Enforce complex business rules
+
+    - Provide transparent event logging
+
+    - Provide auditing
+
+    - Maintain synchronous table replicates
+
+    - Gather statistics on table access
+
+    - Modify table data when DML statements are issued against views
+
+    - Publish information about database events, user events, and SQL statements to subscribing applications
+
+  - Some Cautionary Notes about Triggers
+
+    - Although triggers are useful for customizing a database, use them only when necessary. Excessive use of triggers can result in complex interdependencies, which can be difficult to maintain in a large application. For example, when a trigger fires, a SQL statement within its trigger action potentially can fire other triggers, resulting in `cascading triggers`. This can produce unintended effects.
+
+  - Triggers Compared with Declarative Integrity Constraints
+
+    - You can use both triggers and integrity constraints to define and enforce any type of integrity rule. However, Oracle strongly recommends that you use triggers to constrain data input only in the following situations:
+
+      - To enforce referential integrity when child and parent tables are on different nodes of a distributed database
+
+      - To enforce complex business rules not definable using integrity constraints
+
+      - When a required referential integrity rule cannot be enforced using the following integrity constraints:
+
+        - NOT NULL, UNIQUE
+
+        - PRIMARY KEY
+
+        - FOREIGN KEY
+
+        - CHECK
+
+        - DELETE CASCADE
+
+        - DELETE SET NULL
+
+- Parts of a Trigger
+
+  - A trigger has three basic parts:
+
+    - A triggering event or statement
+
+    - A trigger restriction
+
+    - A trigger action
+
+  - Example: REORDER Trigger
+
+    ```
+    AFTER UPDATE OF parts_on_hand ON inventory /* Triggering Statement */
+    WHEN (new.parts_on_hand < new.reorder_point) /* Trigger Restriction */
+
+    /* Triggered Action */
+    FOR EACH ROW
+    DECLARE /* a dummy variable for conting */
+      NUMBER X;
+    BEGIN
+      SELECT COUNT(*) INTO X /* query to find out if part has already been */
+      FROM pending_orders    /* reordered-if yes, x=1, if no, x=0 */
+      WHERE part_no =: new.part_no;
+
+    IF x = 0
+      THEN  /* part has not been reordered yet, so reorder */
+        INSERT INTO pending_orders
+        VALUES (new.part_no, new.reorder_quantity, sysdate);
+      END IF; /* part has already been reordered */
+    END;
+
+    ```
+
+  - The Triggering Event or Statement
+
+    - A triggering event or statement is the SQL statement, database event, or user event that causes a trigger to fire. A triggering event can be one or more of the following:
+
+      - An INSERT, UPDATE, or DELETE statement on a specific table (or view, in some cases)
+
+      - A CREATE, ALTER, or DROP statement on any schema object
+
+      - A database startup or instance shutdown
+
+      - A specific error message or any error message
+
+      - A user logon or logoff
+
+    - In the above example:
+
+      ```
+      ... UPDATE OF parts_on_hand ON inventory ...
+      ```
+
+      - This statement means that when the parts_on_hand column of a row in the inventory table is updated, fire the trigger. When the triggering event is an UPDATE statement, you can include a column list to identify which columns must be updated to fire the trigger. You cannot specify a column list for INSERT and DELETE statements, because they affect entire rows of information.
+
+    - A triggering event can specify multiple SQL statements:
+
+      ```
+      ... INSERT OR UPDATE OR DELETE OF inventory ...
+      ```
+
+      - This part means that when an INSERT, UPDATE, or DELETE statement is issued against the inventory table, fire the trigger. When multiple types of SQL statements can fire a trigger, you can use conditional predicates to detect the type of triggering statement. In this way, you can create a single trigger that runs different code based on the type of statement that fires the trigger.
+
+  - Trigger Restriction
+
+    - A trigger restriction specifies a Boolean expression that must be true for the trigger to fire. The trigger action is not run if the trigger restriction evaluates to false or unknown. In the example, the trigger restriction is:
+
+      ```
+      new.parts_on_hand < new.reorder_point
+      ```
+
+      - Consequently, the trigger does not fire unless the number of available parts is less than a present reorder amount.
+
+  - Trigger Action
+
+    - A trigger action is the procedure (PL/SQL block, Java program, or C callout) that contains the SQL statements and code to be run when the following events occur:
+
+      - A triggering statement is issued.
+
+      - The trigger restriction evaluates to `true`.
+
+    - Like stored procedures, a trigger action can:
+
+      - Contain SQL, PL/SQL, or Java statements
+
+      - Define PL/SQL language constructs such as variables, constants, cursors, exceptions
+
+      - Define Java language constructs
+
+      - Call stored procedures
+
+    - If the triggers are row triggers, the statements in a trigger action have access to column values of the row being processed by the trigger. Correlation names provide access to the old and new values for each column.
+
 ### 11.2. Types of Triggers
+
+- Row Triggers and Statement Triggers
+
+  - When you define a trigger, you can specify the number of times the trigger action is to be run:
+
+    - Once for every row affected by the triggering statement, such as a trigger fired by an UPDATE statement that updates many rows
+
+    - Once for the triggering statement, no matter how many rows it affects
+
+  - Row Triggers
+
+    - A `row trigger` is fired each time the table is affected by the triggering statement. For example, if an UPDATE statement updates multiple rows of a table, a row trigger is fired once for each row affected by the UPDATE statement. If a triggering statement affects no rows, a row trigger is not run.
+    - Row triggers are useful if the code in the trigger action depends on data provided by the triggering statement or rows that are affected. For example, Figure 22-3 illustrates a row trigger that uses the values of each row affected by the triggering statement.
+
+  - Statement Triggers
+
+    - A `statement trigger` is fired once on behalf of the triggering statement, regardless of the number of rows in the table that the triggering statement affects, even if no rows are affected. For example, if a DELETE statement deletes several rows from a table, a statement-level DELETE trigger is fired only once.
+
+    - Statement triggers are useful if the code in the trigger action does not depend on the data provided by the triggering statement or the rows affected. For example, use a statement trigger to:
+
+      - Make a complex security check on the current time or user
+
+      - Generate a single audit record
+
+- BEFORE and AFTER Triggers
+
+  - When defining a trigger, you can specify the trigger timing—whether the trigger action is to be run before or after the triggering statement. BEFORE and AFTER apply to both statement and row triggers.
+  - BEFORE and AFTER triggers fired by DML statements can be defined only on tables, not on views. However, triggers on the base tables of a view are fired if an INSERT, UPDATE, or DELETE statement is issued against the view. BEFORE and AFTER triggers fired by DDL statements can be defined only on the database or a schema, not on particular tables.
+
+  - BEFORE Triggers
+
+    - BEFORE triggers run the trigger action before the triggering statement is run. This type of trigger is commonly used in the following situations:
+
+      - When the trigger action determines whether the triggering statement should be allowed to complete. Using a BEFORE trigger for this purpose, you can eliminate unnecessary processing of the triggering statement and its eventual rollback in cases where an exception is raised in the trigger action.
+
+      - To derive specific column values before completing a triggering INSERT or UPDATE statement.
+
+  - AFTER Triggers
+
+    - AFTER triggers run the trigger action after the triggering statement is run.
+
+  - Trigger Type Combinations
+
+    - Using the options listed previously, you can create four types of row and statement triggers:
+
+      - BEFORE statement trigger
+
+        - Before executing the triggering statement, the trigger action is run.
+
+      - BEFORE row trigger
+
+        - Before modifying each row affected by the triggering statement and before checking appropriate integrity constraints, the trigger action is run, if the trigger restriction was not violated.
+
+      - AFTER statement trigger
+
+        - After executing the triggering statement and applying any deferred integrity constraints, the trigger action is run.
+
+      - AFTER row trigger
+
+        - After modifying each row affected by the triggering statement and possibly applying appropriate integrity constraints, the trigger action is run for the current row provided the trigger restriction was not violated. Unlike BEFORE row triggers, AFTER row triggers lock rows.
+
+    - You can have multiple triggers of the same type for the same statement for any given table. For example, you can have two BEFORE statement triggers for UPDATE statements on the employees table. Multiple triggers of the same type permit modular installation of applications that have triggers on the same tables. Also, Oracle materialized view logs use AFTER row triggers, so you can design your own AFTER row trigger in addition to the Oracle-defined AFTER row trigger.
+
+    - You can create as many triggers of the preceding different types as you need for each type of DML statement, (INSERT, UPDATE, or DELETE).
+
+- INSTEAD OF Triggers
+
+  - INSTEAD OF triggers provide a transparent way of modifying views that cannot be modified directly through DML statements (INSERT, UPDATE, and DELETE). These triggers are called INSTEAD OF triggers because, unlike other types of triggers, Oracle fires the trigger instead of executing the triggering statement.
+
+  - You can write normal INSERT, UPDATE, and DELETE statements against the view and the INSTEAD OF trigger is fired to update the underlying tables appropriately. INSTEAD OF triggers are activated for each row of the view that gets modified.
+
+  - Modify Views
+
+    - Modifying views can have ambiguous results:
+
+      - Deleting a row in a view could either mean deleting it from the base table or updating some values so that it is no longer selected by the view.
+
+      - Inserting a row in a view could either mean inserting a new row into the base table or updating an existing row so that it is projected by the view.
+
+      - Updating a column in a view that involves joins might change the semantics of other columns that are not projected by the view.
+
+    - Object views present additional problems. For example, a key use of object views is to represent master/detail relationships. This operation inevitably involves joins, but modifying joins is inherently ambiguous.
+
+    - As a result of these ambiguities, there are many restrictions on which views are modifiable. An INSTEAD OF trigger can be used on object views as well as relational views that are not otherwise modifiable.
+
+    - A view is inherently modifiable if data can be inserted, updated, or deleted without using INSTEAD OF triggers and if it conforms to the restrictions listed as follows. Even if the view is inherently modifiable, you might want to perform validations on the values being inserted, updated or deleted. INSTEAD OF triggers can also be used in this case. Here the trigger code performs the validation on the rows being modified and if valid, propagate the changes to the underlying tables.
+
+    - INSTEAD OF triggers also enable you to modify object view instances on the client-side through OCI. To modify an object materialized by an object view in the client-side object cache and flush it back to the persistent store, you must specify INSTEAD OF triggers, unless the object view is inherently modifiable. However, it is not necessary to define these triggers for just pinning and reading the view object in the object cache.
+
+  - Views That Are Not Modifiable
+
+    - If the view query contains any of the following constructs, the view is not inherently modifiable and you therefore cannot perform inserts, updates, or deletes on the view:
+
+      - Set operators
+
+      - Aggregate functions
+
+      - GROUP BY, CONNECT BY, or START WITH clauses
+
+      - The DISTINCT operator
+
+      - Joins (however, some join views are updatable)
+
+    - If a view contains pseudocolumns or expressions, you can only update the view with an UPDATE statement that does not refer to any of the pseudocolumns or expressions.
+
+  - INSTEAD OF Triggers on Nested Tables
+    - You cannot modify the elements of a nested table column in a view directly with the TABLE clause. However, you can do so by defining an INSTEAD OF trigger on the nested table column of the view. The triggers on the nested tables fire if a nested table element is updated, inserted, or deleted and handle the actual modifications to the underlying tables.
+
+- Triggers on System Events and User Events
+
+  - You can use triggers to publish information about database events to subscribers. Applications can subscribe to database events just as they subscribe to messages from other applications. These database events can include:
+
+    - System events
+
+      - Database startup and shutdown
+
+      - Server error message events
+
+    - User events
+
+      - User logon and logoff
+
+      - DDL statements (CREATE, ALTER, and DROP)
+
+      - DML statements (INSERT, DELETE, and UPDATE)
+
+  - Triggers on system events can be defined at the database level or schema level. The DBMS_AQ package is one example of using database triggers to perform certain actions. For example, a database shutdown trigger is defined at the database level:
+
+    ```
+    CREATE TRIGGER register_shutdown
+      ON DATABASE
+      SHUTDOWN
+        BEGIN
+        ...
+        DBMS_AQ.ENQUEUE(...);
+        ...
+        END;
+    ```
+
+  - Triggers on DDL statements or logon/logoff events can also be defined at the database level or schema level. Triggers on DML statements can be defined on a table or view. A trigger defined at the database level fires for all users, and a trigger defined at the schema or table level fires only when the triggering event involves that schema or table.
+
+  - Event Publication
+
+    - Event publication uses the publish-subscribe mechanism of Oracle Streams Advanced Queuing. A queue serves as a message repository for subjects of interest to various subscribers. Triggers use the DBMS_AQ package to enqueue a message when specific system or user events occur.
+
+  - Event Attributes
+
+    - Each event allows the use of attributes within the trigger text. For example, the database startup and shutdown triggers have attributes for the instance number and the database name, and the logon and logoff triggers have attributes for the user name. You can specify a function with the same name as an attribute when you create a trigger if you want to publish that attribute when the event occurs. The attribute's value is then passed to the function or payload when the trigger fires. For triggers on DML statements, the :OLD column values pass the attribute's value to the :NEW column value.
+
+  - System Events
+
+    - System events that can fire triggers are related to instance startup and shutdown and error messages. Triggers created on startup and shutdown events have to be associated with the database. Triggers created on error events can be associated with the database or with a schema.
+
+      - `STARTUP` triggers fire when the database is opened by an instance. Their attributes include the system event, instance number, and database name.
+
+      - `SHUTDOWN` triggers fire just before the server starts shutting down an instance. You can use these triggers to make subscribing applications shut down completely when the database shuts down. For abnormal instance shutdown, these triggers cannot be fired. The attributes of SHUTDOWN triggers include the system event, instance number, and database name.
+
+      - `SERVERERROR` triggers fire when a specified error occurs, or when any error occurs if no error number is specified. Their attributes include the system event and error number.
+
+  - User Events
+
+    - User events that can fire triggers are related to user logon and logoff, DDL statements, and DML statements.
+
+    - Triggers on `LOGON` and `LOGOFF` Events
+
+      - `LOGON` and `LOGOFF` triggers can be associated with the database or with a schema. Their attributes include the system event and user name, and they can specify simple conditions on `USERID` and `USERNAME`.
+
+        - `LOGON` triggers fire after a successful logon of a user.
+
+        - `LOGOFF` triggers fire at the start of a user logoff.
+
+    - Triggers on DDL Statements
+
+      - DDL triggers can be associated with the database or with a schema. Their attributes include the system event, the type of schema object, and its name. They can specify simple conditions on the type and name of the schema object, as well as functions like `USERID` and `USERNAME`. DDL triggers include the following types of triggers:
+
+        - `BEFORE CREATE` and `AFTER CREATE` triggers fire when a schema object is created in the database or schema.
+
+        - `BEFORE ALTER` and `AFTER ALTER` triggers fire when a schema object is altered in the database or schema.
+
+        - `BEFORE DROP` and `AFTER DROP` triggers fire when a schema object is dropped from the database or schema.
+
+    - Triggers on DML Statements
+
+      - DML triggers for event publication are associated with a table. They can be either BEFORE or AFTER triggers that fire for each row on which the specified DML operation occurs. You cannot use INSTEAD OF triggers on views to publish events related to DML statements—instead, you can publish events using BEFORE or AFTER triggers for the DML operations on a view's underlying tables that are caused by INSTEAD OF triggers.
+
+      - The attributes of DML triggers for event publication include the system event and the columns defined by the user in the SELECT list. They can specify simple conditions on the type and name of the schema object, as well as functions (such as UID, USER, USERENV, and SYSDATE), pseudocolumns, and columns. The columns can be prefixed by :OLD and :NEW for old and new values. Triggers on DML statements include the following triggers:
+
+        - `BEFORE INSERT` and `AFTER INSERT` triggers fire for each row inserted into the table.
+
+        - `BEFORE UPDATE` and `AFTER UPDATE` triggers fire for each row updated in the table.
+
+        - `BEFORE DELETE` and `AFTER DELETE` triggers fire for each row deleted from the table.
 
 ### 11.3. Introduction to Cursors
 
+- A cursor in SQL is a user-defined iterative variable that enables the user to access query results. It could be thought of as a pointer that points to the context area. A cursor is used by PL/SQL to navigate through the context area. It holds the rows that are returned by SQL statements.
+
+- A cursor is defined using a `DECLARE` statement and taking `SELECT` as a parameter. A cursor is generally given a name so that in future, it could be referred to in the program to retrieve and execute the rows returned by SQL statements.
+
 ### 11.4. Types of Cursors
+
+- Implicit Cursor
+
+  - Whenever a DML statement like INSERT, UPDATE or DELETE is executed, an implicit cursor is generated by default, to process these statements. It is also created when a SELECT statement returning only a single row is executed. Since these cursors are automatically generated, these cursors or the information contained in them can not be controlled by the users. To check the state of these DML statements, Oracle provides a few attributes known as implicit cursor attributes, as given below.
+
+    | Attribute | Description                                                                                                                                                                                                                                      |
+    | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | %FOUND    | Returns TRUE if DML statement was executed successfully or SELECT statement returns one or more rows, otherwise returns FALSE.                                                                                                                   |
+    | %NOTFOUND | It is the logical opposite of the above attribute. Returns TRUE if no statement was executed or no record was fetched, otherwise returns FALSE.                                                                                                  |
+    | %ISOPEN   | Returns TRUE if the cursor is open, otherwise FALSE. The point to be noted here is that an implicit cursor is automatically closed by Oracle once the statement associated with it gets executed. So, in this case, it will always return FALSE. |
+    | %ROWCOUNT | Returns the number of statements from the cursor at a time.                                                                                                                                                                                      |
+
+    - Example:
+
+      - `student` talbe
+
+        | ID  | NAME | AGE | ADDRESS | SALARY |
+        | --- | ---- | --- | ------- | ------ |
+        | 1   | Raj  | 32  | Panipat | 2000   |
+
+      - Now, using the below program, we’ll update the table by decreasing the salary of each below by 1000.
+
+        ```
+        DECLARE
+          total_rows number(2);
+        BEGIN
+          UPDATE employee
+          SET salary = salary - 1000;
+          IF sql%notfound THEN
+            dbms_output.put_line('no customers selected');
+          ELSEIF sql%found THEN
+            total-rows := sql%count;
+            dbms_output.put_line(total_rows || ' customers selected');
+          END IF;
+        END;
+        /
+        ```
+
+        - Here %ROWCOUNT attribute of Oracle has been used to find the number of rows that have been updated in the database.
+
+        - Output:
+
+          ```
+          Statement processed.
+          6 customers selected
+          ```
+
+      - Now, if we see our table, the rows have been updated and the salary of each employee has been reduced by 1000.
+
+        | ID  | NAME | AGE | ADDRESS | SALARY |
+        | --- | ---- | --- | ------- | ------ |
+        | 1   | Raj  | 32  | Panipat | 1000   |
+
+- Explicit Cursor
+
+  - An explicit cursor is a programmer-defined cursor that is created when we are executing a SELECT statement returning more than one row. Even though the cursor stores several records simultaneously, only one can be processed at a time, which is referred to as the current row. This cursor is defined for gaining extra control over the context area.
+
+  - The syntax for defining an explicit cursor:
+
+    ```
+    CURSOR cusor_name IS select_statement
+    ```
+
+  - Working with an explicit cursor is not the same as with an implicit cursor, some steps have to be followed while using an explicit cursor. The steps are defined as follows
+
+    - Declaring the Cursor
+
+      - The cursor is declared in the DECLARE section along with the associated SELECT statement.
+
+        ```
+        CURSOR CUSRSORNAME IS SELECT ...;
+        ```
+
+    - Opening the Cursor
+
+      - The cursor is opened in the execution section and doing so allocates the memory for the cursor to fetch the rows returned by the SQL statement.
+
+        ```
+        OPEN cursor_name;
+        ```
+
+    - Fetching the Cursor
+
+      - This operation involves fetching the data, accessing one row at a time.
+
+        ```
+        FETCH cursor_name INTO record_name;
+        ```
+
+    - Closing the Cursor
+
+      - At the end of the SQL block, the cursor is closed.
+
+        ```
+        CLOSE  cursor__name;
+        ```
+
+  - Example:
+
+    ```
+    DECLARE
+      s_id student.id%type;
+      s_name student.name%type;
+      s_addr student.address%type;
+      CURSOR s_student IS
+        SELECT id, name, address FROM student;
+    BEGIN
+      OPEN s_student;
+      LOOP
+      FETCH s_student INTO s_id, s_name, s_addr;
+        EXIT WHEN s_student%notfound;
+        dbms_output.put_line(s_id || ' ' || s_name || ' ' || s_addr);
+      END LOOP;
+      CLOSE s_statement;
+    END;
+    /
+    ```
+
+    - In the above code, we declare the cursor as s_student, and it is used to fetch the id, name and address of each student in the database.
+
+    - Output:
+
+      ```
+      Statement processed.
+      1 Raj Panipat
+      2 Roahn Delhi
+      ...
+      ```
+
+- How to Create a Cursor?
+
+  - A cursor in SQL can be created by using the above method, following the four steps, or we can also use the FOR LOOP for working with the cursor, by giving the cursor name instead of the range limit in the for loop statement. This will make the for loop run from the cursor’s first record to the cursor’s last record. The FOR loop will perform the cursor variable, cursor opening, cursor fetching, and cursor closing implicitly.
+
+  - Syntax:
+
+    ```
+    DECLARE
+      CURSOR <cursor_name> IS <SELECT statement>;
+    BEGIN
+      FOR I IN <cursor_name>
+      LOOP
+      ...
+      END LOOP;
+    END;
+    ```
+
+  - Example:
+
+    ```
+    DELCARE
+    CURSOR student_s IS SELECT name FROM student;
+    BEGIN
+    FOR lv_s_name IN student_s
+    LOOP
+    Dbms_output.put_line(lv_s_name.name);
+    END LOOP;
+    END;
+    /
+    ```
+
+    - Here, the cursor is created as student_s. The for loop variable is named lv_s_name. The above code prints the name of the student in each iteration of the for a loop.
+
+    - Output:
+
+      ```
+      Raj
+      Rohan
+      ...
+      ```
+
+- Cursor Life Cycle
+  A cursor life cycle has below five steps:
+
+  - Cursor Declaration
+
+    - The SQL statement is used to declare a cursor.
+
+  - Cursor Opening
+
+    - A cursor is opened to store data from the result collection.
+
+  - Cursor Fetching
+
+    - When a cursor is opened, rows can be fetched one at a time or in a block to perform data manipulation.
+
+  - Cursor Closing
+
+    - Following data manipulation, the cursor should be directly locked.
+
+  - Cursor Deallocation
+    - Cursors can be deallocated to erase the cursor description and free all resources associated with the cursor.
 
 ### 11.5. Introduction to Stored Procedures
 
-### 11.6. Advantages and Disadvantages of Cusors
+- A `stored procedure` (also termed `proc`, `storp`, `sproc`, `StoPro`, `StoredProc`, `StoreProc`, `sp`, or `SP`) is a `subroutine` available to applications that access a `relational database management system` (RDBMS). Such procedures are stored in the database `data dictionary`(metadata repository).
+
+- Uses for stored procedures include `data-validation` (integrated into the database) or `access-control` mechanisms. Furthermore, stored procedures can consolidate and centralize logic that was originally implemented in applications.
+
+- To save time and memory, extensive or complex processing that requires execution of several SQL statements can be saved into stored procedures, and all applications call the procedures. One can use nested stored procedures by executing one stored procedure from within another.
+
+- Stored procedures may return result sets, i.e., the results of a `SELECT` statement. Such result sets can be processed using cursors, by other stored procedures, by associating a result-set locator, or by applications. Stored procedures may also contain declared variables for processing data and cursors that allow it to loop through multiple rows in a table. Stored-procedure flow-control statements typically include `IF`, `WHILE`, `LOOP`, `REPEAT`, and `CASE` statements, and more. Stored procedures can receive variables, return results or modify variables and return them, depending on how and where the variable is declared.
+
+- Implementation
+
+  - Stored procedures are similar to `user-defined functions` (UDFs). The major difference is that UDFs can be used like any other expression within SQL statements, whereas stored procedures must be invoked using the `CALL` statement.
+
+    ```
+    CALL procedure(...)
+    ```
+
+    or
+
+    ```
+    EXECUTE procedure(...)
+    ```
+
+  - The exact and correct implementation of stored procedures varies from one database system to the other. Most major database vendors support them in some form. Depending on the database system, stored procedures can be implemented in a variety of programming languages, for example SQL, Java, C, or C++. Stored procedures written in non-SQL languages may or may not execute SQL statements themselves.
+
+- Comparison with static SQL
+
+  - `Overhead`
+    - Because stored procedure statements are stored directly in the database, they may remove all or part of the compiling overhead that is typically needed in situations where software applications send inline (dynamic) SQL queries to a database. (However, most database systems implement statement caches and other methods to avoid repetitively compiling dynamic SQL statements.) Also, while they avoid some pre-compiled SQL, statements add to the complexity of creating an optimal execution plan because not all arguments of the SQL statement are supplied at compile time. Depending on the specific database implementation and configuration, mixed performance results will be seen from stored procedures versus generic queries or user defined functions.
+  - `Avoiding network traffic`
+    - A major advantage of stored procedures is that they can run directly within the database engine. In a production system, this typically means that the procedures run entirely on a specialized database server, which has direct access to the data being accessed. The benefit here is that network communication costs can be avoided completely. This becomes more important for complex series of SQL statements.
+  - Encapsulating business logic
+    - Stored procedures allow programmers to embed business logic as an API in the database, which can simplify data management and reduce the need to encode the logic elsewhere in client programs. This can result in a lesser likelihood of data corruption by faulty client programs. The database system can ensure data integrity and consistency with the help of stored procedures.
+  - `Delegating access-rights`
+    - In many systems, stored procedures can be granted access rights to the database that users who execute those procedures do not directly have.
+  - `Some protection from SQL injection attacks`
+    - Stored procedures can be used to protect against injection attacks. Stored procedure parameters will be treated as data even if an attacker inserts SQL commands. Also, some DBMS will check the parameter's type. However, a stored procedure that in turn generates dynamic SQL using the input is still vulnerable to SQL injections unless proper precautions are taken.
+
+- Other uses
+
+  - In some systems, stored procedures can be used to control transaction management; in others, stored procedures run inside a transaction such that transactions are effectively transparent to them. Stored procedures can also be invoked from a `database trigger` or a condition handler. For example, a stored procedure may be triggered by an insert on a specific table, or update of a specific field in a table, and the code inside the stored procedure would be executed. Writing stored procedures as condition handlers also allows database administrators to track errors in the system with greater detail by using stored procedures to catch the errors and record some audit information in the database or an external resource like a file.
+
+- Comparison with functions
+
+  - A function is a subprogram written to perform certain computations.
+  - A scalar function returns only one value (or `NULL`), whereas a table function returns a (relational) table comprising zero or more rows, each row with one or more columns.
+  - Functions must return a value (using the `RETURN` keyword), but for stored procedures this is not mandatory.
+  - Stored procedures can use `RETURN` keyword but with no value being passed.
+  - Functions could be used in `SELECT` statements, provided they do no data manipulation. However, procedures cannot be included in `SELECT` statements.
+  - A stored procedure can return multiple values using the `OUT` parameter, or return no value.
+  - A stored procedure saves the query compiling time.
+  - A stored procedure is a database object.
+  - A stored procedure is a material object.
+
+- Comparison with prepared statements
+
+  - `Prepared statements` take an ordinary statement or query and parameterize it so that different literal values can be used at a later time. Like stored procedures, they are stored on the server for efficiency and provide some protection from SQL injection attacks. Although simpler and more declarative, prepared statements are not ordinarily written to use procedural logic and cannot operate on variables. Because of their simple interface and client-side implementations, prepared statements are more widely reusable between DBMS.
+
+    - Prepared statement
+
+      - In database management systems (DBMS), a `prepared statement`, `parameterized statement`, or `parameterized query` is a feature used to pre-compile SQL code, separating it from data.
+      - Benefits of prepared statements are:
+
+        - efficiency, because they can be used repeatedly without re-compiling
+        - security, by reducing or eliminating SQL injection attacks
+
+      - A prepared statement takes the form of a pre-compiled `template` into which constant values are substituted during each execution, and typically use `SQL DML` statements such as `INSERT`, `SELECT`, or `UPDATE`.
+
+      - A common workflow for prepared statements is:
+
+        - 1. `Prepare`: The application creates the statement template and sends it to the DBMS. Certain values are left unspecified, called parameters, placeholders or bind variables (labelled "?" below):
+
+          ```
+          INSERT INTO products (name, price) VALUES (?, ?);
+          ```
+
+        - 2. `Compile`: The DBMS compiles (parses, optimizes and translates) the statement template, and stores the result without executing it.
+
+        - 3. `Execute`: The application supplies (or binds) values for the parameters of the statement template, and the DBMS executes the statement (possibly returning a result). The application may request the DBMS to execute the statement many times with different values. In the above example, the application might supply the values "bike" for the first parameter and "10900" for the second parameter, and then later the values "shoes" and "7400".
+
+      - The alternative to a prepared statement is calling SQL directly from the application source code in a way that combines code and data. The direct equivalent to the above example is:
+
+        ```
+        INSERT INTO products (name, price) VALUES ("bike", "10900");
+        ```
+
+      - Not all optimization can be performed at the time the statement template is compiled, for two reasons: the best plan may depend on the specific values of the parameters, and the best plan may change as tables and indexes change over time.
+
+      - On the other hand, if a query is executed only once, server-side prepared statements can be slower because of the additional round-trip to the server.[3] Implementation limitations may also lead to performance penalties; for example, some versions of MySQL did not cache results of prepared queries.[4] A stored procedure, which is also precompiled and stored on the server for later execution, has similar advantages. Unlike a stored procedure, a prepared statement is not normally written in a procedural language and cannot use or modify variables or use control flow structures, relying instead on the declarative database query language. Due to their simplicity and client-side emulation, prepared statements are more portable across vendors.
+
+- Comparison with smart contracts
+
+  - Smart contract is a term applied to executable code stored on a blockchain as opposed to an RDBMS. Despite the execution result consensus mechanisms of public blockchain networks differing in principle from traditional private or federated databases, they perform ostensibly the same function as stored procedures, albeit usually with a sense of value transaction.
+
+- Disadvantages
+
+  - Stored procedure languages are often vendor-specific. Changing database vendors usually requires rewriting existing stored procedures.
+  - Changes to stored procedures are harder to keep track of within a version control system than other code. Changes must be reproduced as scripts to be stored in the project history to be included, and differences in procedures can be harder to merge and track correctly.
+  - Errors in stored procedures cannot be caught as part of a compilation or build step in an application IDE - the same is true if a stored procedure went missing or was accidentally deleted.
+  - Stored procedure languages from different vendors have different levels of sophistication.
+    - For example, Postgres' pgpsql has more language features (especially via extensions) than Microsoft's T-SQL.
+  - Tool support for writing and debugging stored procedures is often not as good as for other programming languages, but this differs between vendors and languages.
+    - For example, both PL/SQL and T-SQL have dedicated IDEs and debuggers. PL/PgSQL can be debugged from various IDEs.
+
+### 11.6. Advantages and Disadvantages of Cursors
+
+- Why use cursors?
+
+  - In relational databases, operations are made on a set of rows. For example, a SELECT statement returns a set of rows which is called a result set. Sometimes the application logic needs to work with a row at a time rather than the entire result set at once. This can be done using cursors.
+
+- Cursor limitations
+  - A cursor is a memory resident set of pointers -- meaning it occupies memory from your system that may be available for other processes.
+  - The cursors are slower because they update tables row by row.
