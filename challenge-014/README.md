@@ -7317,11 +7317,257 @@
 
 ### 10.1. Multiuser Databases
 
+- Difference between Single User and Multi User Database Systems
+
+  - A criterion for classifying a database system is the number of users who can use the system concurrently. It can be divided into single-user and multi-user database systems.
+
+    - 1. Single User Database Systems: In this DBMS, at one time, only a single user can access the database. Hence, the user can use all the resources at all times. All these systems are used for personal usage, such as personal computer experience. In this type of DBMS, both the physical and application layer can be used by the user.
+
+      - Example: Personal Computers
+
+    - 2. Multi-User Database Systems: These DBMSs support two or more two users accessing the database simultaneously. Multi-user systems contain all the mini-computers and mainframe computers. In a mainframe computer, the database may exist on a single computer, and in other computers, the database may be distributed on multiple computers. Multiple users can update data while working together simultaneously.
+
+      - Example: Databases of Banks, insurance agencies, stock exchanges, supermarkets, etc.
+
 ### 10.2. Transaction
+
+- What are SQL Transactions?
+
+  - A SQL transaction is a grouping of one or more SQL statements that interact with a database. A transaction in its entirety can commit to a database as a single logical unit or rollback (become undone) as a single logical unit. In SQL, transactions are essential for maintaining database integrity.
+
+    - They are used to preserve integrity when multiple related operations are executed concurrently, or when multiple users interact with a database concurrently.
+
+- Why are SQL Transactions Necessary?
+
+  - A database application has to account for every possible failure scenario while writing and reading from a database. Without SQL transactions, application code that protects database integrity would be complex and expensive to develop and maintain. With SQL transactions, application code and database maintenance can be simplified.
+
+- Understanding SQL Transactions with an Example
+
+  - Consider a financial brokerage that maintains a database for its clients. The brokerage is required to generate a quarterly financial statement for each of its clients. The financial statement reports the statement balance, current values of holdings, and any transactions that occurred during the quarter. To generate the statement, you may need to process the following steps:
+
+    - 1. Loop through each client’s transaction history account to ascertain and calculate each of the transactions that occurred during the quarter (both purchases and sales).
+    - 2. Calculate each client portfolio’s total return for the quarter, along with year-to-date returns.
+    - 3. Calculate each client’s taxable and non-taxable returns for the quarter.
+    - 4. Insert a record into a statements table to record the prior three steps.
+    - 5. Update the current portfolio holdings’ values and investment totals for the quarter in a quarterly_values table.
+    - 6. Update the statement balance in an accounts table.
+
+  - Many read and write operations are required for the above steps. There are a number of scenarios where data integrity could be violated, including:
+
+    - A transaction that falls within a reported quarter is backed out or changed after calculations have already been made
+
+    - One of the updates noted above fails after we have already inserted a record into the statements table
+
+    - The total statement balance cannot be updated
+
+  - Without SQL transactions, application code would need to account for every possible permutation of errors that could occur in the database. With SQL transactions, all of the above statements can be contained in a transaction block that either succeeds or fails.
+
+- SQL Transaction Delimiter Syntax
+
+  - Note
+
+    - The implementation of transactions is very similar in concept across most database implementations, but the syntax can vary slightly.
+
+  - Typically, the beginning of a transaction in a SQL Server command line is defined using the `BEGIN TRANSACTION` statement:
+
+    ```
+    BEGIN TRANSACTION NameOfTransaction;
+    ```
+
+  - In MySQL, the syntax is slightly different, but has the same meaning:
+
+    ```
+    START TRANSACTION;
+    ```
+
+- Commit Transaction Syntax
+
+  - If a database application determines that all of the changes for a transaction have succeeded, the application can use the COMMIT TRANSACTION statement. This commits those changes to the database, and it is placed at the end of a block of statements. In SQL Server, the following command is used to commit the transaction:
+
+    ```
+    COMMIT TRANSACTION;
+    ```
+
+  - Alternatively, you can also use the below command. The following command can also be used in MySQL.
+
+    ```
+    COMMIT;
+    ```
+
+- Roll Back Transaction Syntax
+
+  - If a database application determines that a change in a transaction has failed, the application can use the ROLLBACK statement. This statement can effectively de-commit any statements that have already been executed since the beginning of the transaction. In SQL Server and MySQL, the following command is used to roll back a transaction:
+
+    ```
+    ROLLBACK;
+    ```
+
+- Database Transaction Examples
+
+  - To demonstrate the mechanism behind transaction processing, consider the example of a simple database named School. One of the tables in the database is named Course and is defined as follows:
+
+    - Course
+
+      - CourseId
+      - CourseName
+
+      ```
+      CREATE TABLE Course(
+        CourseId   SMALLINT    NOT NULL;
+        CourseName VARCHAR(40) NOT NULL
+      );
+      ```
+
+  - Example 1: Commit a Transaction
+
+    - The example below obtains the largest `CourseId` value from table `Course` and adds `1` to it. It then inserts a row into the `Course` table and commits the transaction. Before committing, if any part of the `CourseAdd` transaction fails to execute, then none of the transactions can be processed. That means if the `Select` or `Insert` statement fails in some capacity, the entire transaction is null and void.
+
+      ```
+      BEGIN TRANSACTION CourseAdd;
+
+      DECLARE @CrsId SMALLINT;
+
+      SELECT @CrsId = MAX(CourseId) + 1
+      FROM Course;
+
+      INSERT Course VALUES (@CrsId, 'Biology 101');
+
+      COMMIT TRANSACTION;
+      ```
+
+  - Example 2: Roll Back a Transaction
+
+    - In the example below, although rows are manually inserted into the Course table, all the Insert statements are wrapped into a transaction. That way, if a transaction fails to execute, you can roll back the entire transaction using the following MySQL syntax:
+
+      ```
+      START TRANSACTION;
+      INSERT Course VALUES (1, 'Biology 101');
+      INSERT Course VALUES (2, 'Computer Science 101');
+      ROLLBACK;
+      ```
+
+      - From the above MySQL syntax, you have ensured that the Insert statements have not committed (inserted) the data into the Course table until a Commit command is received. By issuing a Rollback statement, you have effectively undone the two prior Insert statements, and not committed either of these two rows to the database.
+
+  - Example 3: Combining Commit and Rollback in a Transaction
+
+    - The example below combines the ability to both commit and rollback transactions in the same transaction code block.
+
+      ```
+      BEGIN TRANSACTION InsertCourse;
+
+      DECLARE @CrsId SMALLINT;
+
+      SELECT @CrsId = MAX(CourseId) + 1
+      FROM Course;
+
+      INSERT Course VALUES (@CrsId, 'Biology 101');
+
+      IF (SELECT COUNT(CourseName)
+        FROM Course
+        WHERE CourseName = 'Biology 101') > 1
+        ROLLBACK;
+      END IF;
+
+      COMMIT TRANSACTION;
+      ```
+
+      - The MySQL code above inserts a row in the Course table with the next highest CourseId. Before committing the transaction, the code checks if there are more than one rows where the CourseName is Biology 101. If true, the transaction is not committed to the database. At this point, the transaction rolls back and the code segment aborts from further processing. Otherwise, if the new row is the first instance of a CourseName of Biology 101, then the transaction proceeds and is committed to the database.
+
+- More Benefits of Using Transactions
+
+  - When should you use transactions? Should you always use transactions?
+
+    - The simple answer is yes. This is especially true when you are dealing with multiple groups of statements. In a transaction, all of the statements in a sequence of statements must succeed for the associated data to be committed to the database. A failure of a component within the transaction necessitates a rollback.
+
+    - The use of transactions is also beneficial to protect against database failure conditions, including power failures, server crashes, disk drive failure, and database software crashes. In the event of one of these failures, if there are transactions that have not yet been committed, database integrity is maintained. Without transactions, any atomic statements that are applied to the database remain intact, regardless of whether associated statements have been executed. This may result in a data integrity issue
 
 ### 10.3. Index
 
+- Database index
+
+  - A database index is a data structure that improves the speed of data retrieval operations on a database table at the cost of additional writes and storage space to maintain the index data structure. Indexes are used to quickly locate data without having to search every row in a database table every time a database table is accessed. Indexes can be created using one or more columns of a database table, providing the basis for both rapid random lookups and efficient access of ordered records.
+
+  - An index is a copy of selected columns of data, from a table, that is designed to enable very efficient search. An index normally includes a "key" or direct link to the original row of data from which it was copied, to allow the complete row to be retrieved efficiently.
+
+- Usage
+
+  - Support for fast lookup
+
+    - Most database software includes indexing technology that enables sub-linear time lookup to improve performance, as linear search is inefficient for large databases.
+
+    - Suppose a database contains N data items and one must be retrieved based on the value of one of the fields. A simple implementation retrieves and examines each item according to the test. If there is only one matching item, this can stop when it finds that single item, but if there are multiple matches, it must test everything. This means that the number of operations in the average case is O(N) or linear time. Since databases may contain many objects, and since lookup is a common operation, it is often desirable to improve performance.
+
+    - An index is any data structure that improves the performance of lookup. There are many different data structures used for this purpose. There are complex design trade-offs involving lookup performance, index size, and index-update performance. Many index designs exhibit logarithmic (O(log(N))) lookup performance and in some applications it is possible to achieve flat (O(1)) performance.
+
+  - Policing the database constraints
+
+    - Indexes are used to police database constraints, such as UNIQUE, EXCLUSION, PRIMARY KEY and FOREIGN KEY. An index may be declared as UNIQUE, which creates an implicit constraint on the underlying table. Database systems usually implicitly create an index on a set of columns declared PRIMARY KEY, and some are capable of using an already-existing index to police this constraint. Many database systems require that both referencing and referenced sets of columns in a FOREIGN KEY constraint are indexed, thus improving performance of inserts, updates and deletes to the tables participating in the constraint.
+
+    - Some database systems support an EXCLUSION constraint that ensures that, for a newly inserted or updated record, a certain predicate holds for no other record. This can be used to implement a UNIQUE constraint (with equality predicate) or more complex constraints, like ensuring that no overlapping time ranges or no intersecting geometry objects would be stored in the table. An index supporting fast searching for records satisfying the predicate is required to police such a constraint.
+
+- Index architecture and indexing methods
+
+  - Non-clustered
+
+    - The data is present in arbitrary order, but the logical ordering is specified by the index. The data rows may be spread throughout the table regardless of the value of the indexed column or expression. The non-clustered index tree contains the index keys in sorted order, with the leaf level of the index containing the pointer to the record (page and the row number in the data page in page-organized engines; row offset in file-organized engines).
+
+    - In a non-clustered index,
+
+      - The physical order of the rows is not the same as the index order.
+      - The indexed columns are typically non-primary key columns used in JOIN, WHERE, and ORDER BY clauses.
+
+    - There can be more than one non-clustered index on a database table.
+
+  - Clustered
+
+    - Clustering alters the data block into a certain distinct order to match the index, resulting in the row data being stored in order. Therefore, only one clustered index can be created on a given database table. Clustered indices can greatly increase overall speed of retrieval, but usually only where the data is accessed sequentially in the same or reverse order of the clustered index, or when a range of items is selected.
+
+    - Since the physical records are in this sort order on disk, the next row item in the sequence is immediately before or after the last one, and so fewer data block reads are required. The primary feature of a clustered index is therefore the ordering of the physical data rows in accordance with the index blocks that point to them. Some databases separate the data and index blocks into separate files, others put two completely different data blocks within the same physical file(s).
+
+  - Cluster
+
+    - When multiple databases and multiple tables are joined, it is called a cluster (not to be confused with clustered index described previously). The records for the tables sharing the value of a cluster key shall be stored together in the same or nearby data blocks. This may improve the joins of these tables on the cluster key, since the matching records are stored together and less I/O is required to locate them.[2] The cluster configuration defines the data layout in the tables that are parts of the cluster. A cluster can be keyed with a B-Tree index or a hash table. The data block where the table record is stored is defined by the value of the cluster key.
+
+  - Column order
+
+    - The order that the index definition defines the columns in is important. It is possible to retrieve a set of row identifiers using only the first indexed column. However, it is not possible or efficient (on most databases) to retrieve the set of row identifiers using only the second or greater indexed column.
+
+    - For example, in a phone book organized by city first, then by last name, and then by first name, in a particular city, one can easily extract the list of all phone numbers. However, it would be very tedious to find all the phone numbers for a particular last name. One would have to look within each city's section for the entries with that last name. Some databases can do this, others just won't use the index.
+
+    - In the phone book example with a composite index created on the columns (city, last_name, first_name), if we search by giving exact values for all the three fields, search time is minimal—but if we provide the values for city and first_name only, the search uses only the city field to retrieve all matched records. Then a sequential lookup checks the matching with first_name. So, to improve the performance, one must ensure that the index is created on the order of search columns.
+
+  - Applications and limitations
+
+    - Indexes are useful for many applications but come with some limitations. Consider the following SQL statement: SELECT first_name FROM people WHERE last_name = 'Smith';. To process this statement without an index the database software must look at the last_name column on every row in the table (this is known as a full table scan). With an index the database simply follows the index data structure (typically a B-tree) until the Smith entry has been found; this is much less computationally expensive than a full table scan.
+
+    - Consider this SQL statement: SELECT email_address FROM customers WHERE email_address LIKE '%@wikipedia.org';. This query would yield an email address for every customer whose email address ends with "@wikipedia.org", but even if the email_address column has been indexed the database must perform a full index scan. This is because the index is built with the assumption that words go from left to right. With a wildcard at the beginning of the search-term, the database software is unable to use the underlying index data structure (in other words, the WHERE-clause is not sargable). This problem can be solved through the addition of another index created on reverse(email_address) and a SQL query like this: SELECT email_address FROM customers WHERE reverse(email_address) LIKE reverse('%@wikipedia.org');. This puts the wild-card at the right-most part of the query (now gro.aidepikiw@%), which the index on reverse(email_address) can satisfy.
+
+    - When the wildcard characters are used on both sides of the search word as %wikipedia.org%, the index available on this field is not used. Rather only a sequential search is performed, which takes O(N) time.
+
 ### 10.4. Types of Index
+
+- Bitmap index
+
+  - A bitmap index is a special kind of indexing that stores the bulk of its data as bit arrays (bitmaps) and answers most queries by performing `bitwise logical operations` on these bitmaps. The most commonly used indexes, such as `B+ trees`, are most efficient if the values they index do not repeat or repeat a small number of times. In contrast, the bitmap index is designed for cases where the values of a variable repeat very frequently. For example, the sex field in a customer database usually contains at most three distinct values: male, female or unknown (not recorded). For such variables, the bitmap index can have a significant performance advantage over the commonly used trees.
+
+- Dense index
+
+  - A dense index in databases is a file with pairs of keys and pointers for every record in the data file. Every key in this file is associated with a particular pointer to a record in the sorted data file. In clustered indices with duplicate keys, the dense index points to the first record with that key.
+
+- Sparse index
+  A sparse index in databases is a file with pairs of keys and pointers for every block in the data file. Every key in this file is associated with a particular pointer to the block in the sorted data file. In clustered indices with duplicate keys, the sparse index points to the lowest search key in each block.
+
+- Reverse index
+
+  A reverse-key index reverses the key value before entering it in the index. E.g., the value 24538 becomes 83542 in the index. Reversing the key value is particularly useful for indexing data such as sequence numbers, where new key values monotonically increase.
+
+- Primary index
+  The primary index contains the key fields of the table and a pointer to the non-key fields of the table. The primary index is created automatically when the table is created in the database.
+
+- Secondary index
+  It is used to index fields that are neither ordering fields nor key fields (there is no assurance that the file is organized on key field or primary key field). One index entry for every tuple in the data file (dense index) contains the value of the indexed attribute and pointer to the block or record.
+
+  Hash index
 
 ## 11. Understanding Triggers, Cursors and Stored procedures
 
