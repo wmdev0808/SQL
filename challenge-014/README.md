@@ -6540,27 +6540,774 @@
 
 ### 8.1. The JOIN Clause
 
+- SQL JOIN
+
+  - A `JOIN` clause is used to combine rows from two or more tables, based on a related column between them.
+
+    - `Orders` table:
+
+      | OrderID | CustomerID | OrderDate  |
+      | ------- | ---------- | ---------- |
+      | 10308   | 2          | 1996-09-18 |
+      | 10309   | 37         | 1996-09-19 |
+      | 10310   | 77         | 1996-09-20 |
+
+    - `Customers` table:
+
+      | CustomerID | CustomerName                       | ContactName    | Country |
+      | ---------- | ---------------------------------- | -------------- | ------- |
+      | 1          | Alfreds Futterkiste                | Maria Anders   | Germany |
+      | 2          | Ana Trujillo Emparedados y helados | Ana Trujillo   | Mexico  |
+      | 3          | Antonio Moreno Taquería            | Antonio Moreno | Mexico  |
+
+    - Notice that the "CustomerID" column in the "Orders" table refers to the "CustomerID" in the "Customers" table. The relationship between the two tables above is the "CustomerID" column.
+
+    - Then, we can create the following SQL statement (that contains an INNER JOIN), that selects records that have matching values in both tables:
+
+  - Example:
+
+    ```
+    SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate
+    FROM Orders
+    INNER JOIN Customers ON Orders.CustomerID=Customers.CustomerID;
+    ```
+
+    - Result:
+
+      | OrderID | CustomerName                       | OrderDate  |
+      | ------- | ---------------------------------- | ---------- |
+      | 10308   | Ana Trujillo Emparedados y helados | 9/18/1996  |
+      | 10365   | Antonio Moreno Taquería            | 11/27/1996 |
+      | 10383   | Around the Horn                    | 12/16/1996 |
+      | 10355   | Around the Horn                    | 11/15/1996 |
+      | 10278   | Berglunds snabbköp                 | 8/12/1996  |
+
+- Different Types of SQL JOINs
+
+  - Here are the different types of the JOINs in SQL:
+
+    - `(INNER) JOIN`: Returns records that have matching values in both tables
+
+    - `LEFT (OUTER) JOIN`: Returns all records from the left table, and the matched records from the right table
+
+    - `RIGHT (OUTER) JOIN`: Returns all records from the right table, and the matched records from the left table
+
+    - `FULL (OUTER) JOIN`: Returns all records when there is a match in either left or right table
+
+  - ![](images/8.1_1.gif)
+
 ### 8.2. Inner Join
+
+- SQL INNER JOIN Keyword
+
+  - The `INNER JOIN` keyword selects records that have matching values in both tables.
+
+  - Syntax:
+
+    ```
+    SELECT column_name(s)
+    FROM table1
+    INNER JOIN table2
+    ON table1.column_name = table2.column_name;
+    ```
+
+  - SQL INNER JOIN Example
+
+    - The following SQL statement selects all orders with customer information:
+
+      ```
+      SELECT Orders.OrderID, Customers.CustomerName
+      FROM Orders
+      INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
+      ```
+
+    - Note: The `INNER JOIN` keyword selects all rows from both tables as long as there is a match between the columns. If there are records in the "Orders" table that do not have matches in "Customers", these orders will not be shown!
+
+- JOIN Three Tables
+
+  - The following SQL statement selects all orders with customer and shipper information:
+
+    ```
+    SELECT Orders.OrderID, Customers.CustomerName, Shippers.ShipperName
+    FROM ((Orders
+    INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID)
+    INNER JOIN Shippers ON Orders.ShipperID = Shippers.ShipperID);
+    ```
 
 ### 8.3. Outer Join
 
+- Outer joins
+
+  - Outer joins are joins that return matched values and unmatched values from either or both tables.
+  - There are a few types of outer joins:
+
+    - `LEFT JOIN` returns only unmatched rows from the left table, as well as matched rows in both tables.
+
+    - `RIGHT JOIN` returns only unmatched rows from the right table , as well as matched rows in both tables.
+
+    - `FULL OUTER JOIN` returns unmatched rows from both tables,as well as matched rows in both tables.
+
+  - Note: `LEFT JOIN` is also refered to as `OUTER LEFT JOIN`. `RIGHT JOIN` is also refered to as `OUTER RIGHT JOIN`. `FULL OUTER JOIN` is also refered to as `OUTER JOIN`.
+
+- Outer joins vs. Inner join
+
+  - When performing an inner join, rows from either table that are unmatched in the other table are not returned. In an outer join, unmatched rows in one or both tables can be returned.
+
 ### 8.4. Functions
+
+- SQL has many built-in functions for performing calculations on data.
+
+- SQL Aggregate Functions
+
+  - SQL aggregate functions return a single value, calculated from values in a column.
+
+  - Useful aggregate functions:
+
+    - `AVG()` - Returns the average value
+    - `COUNT()` - Returns the number of rows
+    - `FIRST()` - Returns the first value
+    - `LAST()` - Returns the last value
+    - `MAX()` - Returns the largest value
+    - `MIN()` - Returns the smallest value
+    - `SUM()` - Returns the sum
+
+- SQL Scalar functions
+
+  - SQL scalar functions return a single value, based on the input value.
+  - Useful scalar functions:
+
+    - `UCASE()` - Converts a field to upper case
+    - `LCASE()` - Converts a field to lower case
+    - `MID()` - Extract characters from a text field
+    - `LEN()` - Returns the length of a text field
+    - `ROUND()` - Rounds a numeric field to the number of decimals specified
+    - `NOW()` - Returns the current system date and time
+    - `FORMAT()` - Formats how a field is to be displayed
 
 ### 8.5. Cross Join
 
+- Introduction
+
+  - The `CROSS JOIN` is used to generate a paired combination of each row of the first table with each row of the second table. This join type is also known as `cartesian join`.
+
+  - Suppose that we are sitting in a coffee shop and we decide to order breakfast. Shortly, we will look at the menu and we will start thinking of which meal and drink combination could be more tastier. Our brain will receive this signal and begin to generate all meal and drink combinations.
+
+  - The following image illustrates all menu combinations that can be generated by our brain. The SQL CROSS JOIN works similarly to this mechanism, as it creates all paired combinations of the rows of the tables that will be joined.
+
+    - ![](images/8.5_1_sql-cross-join-working-mechanism.png)
+
+  - The main idea of the CROSS JOIN is that it returns the `Cartesian product` of the joined tables. In the following tip, we will briefly explain the `Cartesian product`;
+
+    - Tip: What is the `Cartesian Product`?
+
+      - The Cartesian Product is a multiplication operation in the set theory that generates all ordered pairs of the given sets. Suppose that, A is a set and elements are {a,b} and B is a set and elements are {1,2,3}. The Cartesian Product of these two A and B is denoted AxB and the result will be like the following.
+
+      _AxB ={(a,1), (a,2), (a,3), (b,1), (b,2), (b,3)}_
+
+  - Syntax:
+
+    ```
+    SELECT ColumnName_1,
+          ColumnName_2,
+          ColumnName_N
+    FROM [Table_1]
+        CROSS JOIN [Table_2]
+    ```
+
+    - Or we can use the following syntax instead of the previous one. This syntax does not include the CROSS JOIN keyword; only we will place the tables that will be joined after the FROM clause and separated with a comma.
+
+      ```
+      SELECT ColumnName_1,
+            ColumnName_2,
+            ColumnName_N
+      FROM [Table_1],[Table_2]
+      ```
+
+    - Note: Unlike the INNER JOIN, LEFT JOIN and FULL OUTER JOIN, the CROSS JOIN does not require a joining condition.
+
+- SQL CROSS JOIN example:
+
+  - In this example, we will consider the breakfast menu example again, which we mentioned in the earlier part of the article. Firstly, we will create the two-sample tables which contain the drink and meal names. After then, we will populate them with some sample data.
+
+    - Through the following query, we will perform these two-steps:
+
+      ```
+      CREATE TABLE Meals(MealName VARCHAR(100))
+      CREATE TABLE Drinks(DrinkName VARCHAR(100))
+      INSERT INTO Drinks
+      VALUES('Orange Juice'), ('Tea'), ('Cofee')
+      INSERT INTO Meals
+      VALUES('Omlet'), ('Fried Egg'), ('Sausage')
+      SELECT *
+      FROM Meals;
+      SELECT *
+      FROM Drinks
+      ```
+
+    - The following query will join the Meals and Drinks table with the CROSS JOIN keyword and we will obtain all of the paired combinations of the meal and drink names.
+
+      ```
+      SELECT * FROM Meals
+      CROSS JOIN Drinks
+      ```
+
+      ```
+      SELECT * FROM Meals, Drinks
+      ```
+
+    - ![](images/8.5_2_sql-cross-join-working-principle.png)
+
+    - Tip: The resultset row count will equal to multiplication of tables row counts that will be joined. For the breakfast menu example, the Meals table row count is 3 and the Drinks table row count is 3, so the resultset row count can find with the following calculation.
+
+      ```
+      3 (Meals table row count) x 3 (Drinks table row count) = 9 (Resultset row count)
+      ```
+
+  - `CONCAT_WS` function will help to concatenate the column expressions. Thus, we can create a more meaningful breakfast menu resultset
+
+    ```
+    SELECT CONCAT_WS('-',MealName,DrinkName) AS MenuList
+    FROM Meals
+    CROSS JOIN Drinks
+    ```
+
+    - Result:
+
+      | MenuList           |
+      | ------------------ |
+      | Omlet-Orange Juice |
+      | ...                |
+
+- SQL CROSS JOIN and Performance Considerations
+
+  - Tip: CROSS JOIN can only be implemented with `Nested Loops`, so the following queries will return an error if we force Query Optimizer to use other join types.
+
+    ```
+
+    SELECT * FROM Meals
+    CROSS JOIN Drinks
+    OPTION (MERGE  JOIN )
+
+    GO
+
+    SELECT * FROM Meals
+    CROSS JOIN Drinks
+    OPTION (HASH  JOIN )
+    ```
+
 ### 8.6. Aggregate Functions
 
+- `COUNT`
+
+  - Counting all rows
+
+    - COUNT is a SQL aggregate function for counting the number of rows in a particular column. COUNT is the easiest aggregate function to begin with because verifying your results is extremely simple. Let's begin by using \* to select all rows from the Apple stock prices dataset:
+
+      ```
+      SELECT COUNT(*)
+      FROM tutorial.aapl_historical_stock_price
+      ```
+
+      - Note: Typing `COUNT(1)` has the same effect as `COUNT(*)`. Which one you use is a matter of personal preference.
+
+  - Counting individual columns
+
+    - Things start to get a little bit tricky when you want to count individual columns. The following code will provide a count of all of rows in which the `high` column `is not null`.
+
+      ```
+      SELECT COUNT(high)
+      FROM tutorial.aapl_historical_stock_price
+      ```
+
+    - You'll notice that this result is lower than what you got with `COUNT(*)`. That's because high has some nulls.
+      - For example, imagine you've got a table with one column showing email addresses for everyone you sent a marketing email to, and another column showing the date and time that each person opened the email. If someone didn't open the email, the date/time field would likely be null.
+
+  - Counting non-numerical columns
+
+    - One nice thing about COUNT is that you can use it on non-numerical columns:
+
+      ```
+      SELECT COUNT(date)
+      FROM tutorial.aapl_historical_stock_price
+      ```
+
+      - `COUNT` simply counts the total number of non-null rows, not the distinct values.
+
+- `SUM`
+
+  - The SQL SUM function
+
+    - `SUM` is a SQL aggregate function. that totals the values in a given column. Unlike `COUNT`, you can only use `SUM` on columns containing numerical values.
+
+    - Example:
+
+      - The query below selects the sum of the volume column from the Apple stock prices dataset:
+
+        ```
+        SELECT SUM(volume)
+        FROM tutorial.aapl_historical_stock_price
+        ```
+
+    - An important thing to remember: `aggregators only aggregate vertically`. If you want to perform a calculation across rows, you would do this with `simple arithmetic`.
+
+    - You don't need to worry as much about the presence of nulls with `SUM` as you would with `COUNT`, as `SUM` treats nulls as 0.
+
+- `MIN` / `MAX`
+
+  - `MIN` and `MAX` are SQL aggregation functions that return the lowest and highest values in a particular column.
+
+  - They're similar to COUNT in that they can be used on non-numerical columns. Depending on the column type, `MIN` will return the lowest number, earliest date, or non-numerical value as close alphabetically to "A" as possible. As you might suspect, `MAX` does the opposite—it returns the highest number, the latest date, or the non-numerical value closest alphabetically to "Z."
+
+    ```
+    SELECT MIN(volume) AS min_volume,
+       MAX(volume) AS max_volume
+    FROM tutorial.aapl_historical_stock_price
+    ```
+
+- `AVG`
+
+  - `AVG` is a SQL aggregate function that calculates the average of a selected group of values. It's very useful, but has some limitations. First, it can only be used on numerical columns. Second, it ignores nulls completely. You can see this by comparing these two queries of the Apple stock prices dataset:
+
+    ```
+    SELECT AVG(high)
+      FROM tutorial.aapl_historical_stock_price
+    WHERE high IS NOT NULL
+    ```
+
+    - The above query produces the same result as the following query:
+
+      ```
+      SELECT AVG(high)
+      FROM tutorial.aapl_historical_stock_price
+      ```
+
+  - There are some cases in which you'll want to treat null values as 0. For these cases, you'll want to write a statement that changes the nulls to 0
+
+- `FIRST` / `LAST`
+
+  - The `FIRST()` function returns the first value of the selected column.
+
+    - Syntax:
+
+      ```
+      SELECT FIRST(column_name) FROM table_name;
+      ```
+
+    - Queries:
+
+      - Fetching marks of first student from the Students table.
+
+        ```
+        SELECT FIRST(MARKS) AS MarksFirst FROM Students;
+        ```
+
+      - Fetching age of first student from the Students table.
+
+        ```
+        SELECT FIRST(AGE) AS AgeFirst FROM Students;
+        ```
+
+  - `The LAST()` function returns the last value of the selected column. It can be used only in MS ACCESS.
+
+    - Syntax:
+
+      ```
+      SELECT LAST(column_name) FROM table_name;
+      ```
+
+    - Queries:
+
+      - Fetching marks of last student from the Students table.
+
+        ```
+        SELECT LAST(MARKS) AS MarksLast FROM Students;
+        ```
+
 ### 8.7. Scalar Functions
+
+- Scalar functions are the built-in functions in SQL, and whatever be the input provided to the scalar functions, the output returned by these functions will always be a single value.
+
+- `UCASE()`
+
+  - It converts the value of a field to uppercase.
+
+  - Syntax:
+
+    ```
+    SELECT UCASE(column_name) FROM table_name;
+    ```
+
+  - Queries:
+
+    - Converting names of students from the table Students to uppercase.
+
+      ```
+      SELECT UCASE(NAME) FROM Students;
+      ```
+
+- `LCASE()`
+
+  - It converts the value of a field to lowercase.
+
+  - Syntax:
+
+    ```
+    SELECT LCASE(column_name) FROM table_name;
+    ```
+
+  - Queries:
+
+    - Converting names of students from the table Students to lowercase.
+
+      ```
+      SELECT LCASE(NAME) FROM Students;
+      ```
+
+- `MID()`
+
+  - The MID() function extracts texts from the text field.
+
+  - Syntax:
+
+    ```
+    SELECT MID(column_name,start,length) AS some_name FROM table_name;
+    ```
+
+    - Specifying length is optional here, and start signifies start position ( starting from 1 )
+
+  - Queries:
+
+    - Fetching first four characters of names of students from the Students table.
+
+      ```
+      SELECT MID(NAME,1,4) FROM Students;
+      ```
+
+- `LEN()`
+
+  - The LEN() function returns the length of the value in a text field.
+
+  - Syntax:
+
+    ```
+    SELECT LENGTH(column_name) FROM table_name;
+    ```
+
+  - Queries:
+
+    - Fetching length of names of students from Students table.
+
+      ```
+      SELECT LENGTH(NAME) FROM Students;
+      ```
+
+- `ROUND()`
+
+  - The ROUND() function is used to round a numeric field to the number of decimals specified.NOTE: Many database systems have adopted the IEEE 754 standard for arithmetic operations, which says that when any numeric .5 is rounded it results to the nearest even integer i.e, 5.5 and 6.5 both gets rounded off to 6.
+
+  - Syntax:
+
+    ```
+    SELECT ROUND(column_name,decimals) FROM table_name;
+    ```
+
+    - decimals- number of decimals to be fetched.
+
+  - Queries:
+
+    - Fetching maximum marks among students from the Students table.
+
+      ```
+      SELECT ROUND(MARKS,0) FROM table_name;
+      ```
+
+- `NOW()`
+
+  - The NOW() function returns the current system date and time.
+
+  - Syntax:
+
+    ```
+    SELECT NOW() FROM table_name;
+    ```
+
+  - Queries:
+
+    - Fetching current system time.
+
+      ```
+      SELECT NAME, NOW() AS DateTime FROM Students;
+      ```
+
+    - Result:
+
+      | NAME  | DateTime             |
+      | ----- | -------------------- |
+      | HARSH | 1/13/2017 1:30:11 PM |
+
+- `FORMAT()`
+
+  - The FORMAT() function is used to format how a field is to be displayed.
+
+  - Syntax:
+
+    ```
+    SELECT FORMAT(column_name,format) FROM table_name;
+    ```
+
+  - Queries:
+
+    - Formatting current date as ‘YYYY-MM-DD’.
+
+      ```
+      SELECT NAME, FORMAT(Now(),'YYYY-MM-DD') AS Date FROM Students;
+      ```
+
+    - Output:
+
+      | NAME  | Date       |
+      | ----- | ---------- |
+      | HARSH | 2017-01-13 |
 
 ## 9. Introduction to Views and Complex Queries
 
 ### 9.1. Views
 
+- Introduction
+
+  - In SQL, a view is a virtual table based on the result-set of an SQL statement.
+
+  - A view contains rows and columns, just like a real table. The fields in a view are fields from one or more real tables in the database.
+
+  - You can add SQL statements and functions to a view and present the data as if the data were coming from one single table.
+
+  - A view is created with the `CREATE VIEW` statement.
+
+- `CREATE VIEW` Syntax
+
+  ```
+  CREATE VIEW view_name AS
+  SELECT column1, column2, ...
+  FROM table_name
+  WHERE condition;
+  ```
+
+  - Note: A view always shows up-to-date data! The database engine recreates the view, every time a user queries it.
+
+- SQL CREATE VIEW Examples
+
+  - The following SQL creates a view that shows all customers from Brazil:
+
+    ```
+    CREATE VIEW [Brazil Customers] AS
+    SELECT CustomerName, ContactName
+    FROM Customers
+    WHERE Country = 'Brazil';
+    ```
+
+    - We can query the view above as follows:
+
+      ```
+      SELECT * FROM [Brazil Customers];
+      ```
+
+  - The following SQL creates a view that selects every product in the "Products" table with a price higher than the average price:
+
+    ```
+    CREATE VIEW [Products Above Average Price] AS
+    SELECT ProductName, Price
+    FROM Products
+    WHERE Price > (SELECT AVG(Price) FROM Products);
+    ```
+
+    - We can query the view above as follows:
+
+      ```
+      SELECT * FROM [Products Above Average Price];
+      ```
+
+- SQL Updating a View
+
+  - A view can be updated with the `CREATE OR REPLACE VIEW` statement.
+
+  - Syntax:
+
+    ```
+    CREATE OR REPLACE VIEW view_name AS
+    SELECT column1, column2, ...
+    FROM table_name
+    WHERE condition;
+    ```
+
+  - The following SQL adds the "City" column to the "Brazil Customers" view:
+
+    ```
+    CREATE OR REPLACE VIEW [Brazil Customers] AS
+    SELECT CustomerName, ContactName, City
+    FROM Customers
+    WHERE Country = 'Brazil';
+    ```
+
+- SQL Dropping a View
+
+  - A view is deleted with the `DROP VIEW` statement.
+
+  - Syntax:
+
+    ```
+    DROP VIEW view_name;
+    ```
+
+  - The following SQL drops the "Brazil Customers" view:
+
+    ```
+    DROP VIEW [Brazil Customers];
+    ```
+
 ### 9.2. Advantages and Disadvantages of Views
+
+- Advantages:
+
+  1. Views doesn’t store data in a physical location.
+  2. View can be use to hide some of the columns from the table.
+  3. Views can provide Access Restriction, since data insertion, update and deletion is not possible on the view.
+
+- Disadvantages:
+  1. When a table is dropped, associated view become irrelevant.
+  2. Since view are created when a query requesting data from view is triggered, its bit slow.
+  3. When views are created for large tables, it occupy more memory.
 
 ### 9.3. Nested Queries or Subqueries Contd.
 
+- What Is a `Nested SELECT`?
+
+  - A nested SELECT is a query within a query, i.e. when you have a SELECT statement within the main SELECT.
+
+  - Example:
+
+    - Tables:
+
+      - Students
+
+        | id  | name       | class_id | GPA  |
+        | --- | ---------- | -------- | ---- |
+        | 1   | Jack Black | 3        | 3.45 |
+
+      - Teachers
+
+        | id  | name           | subject | class_id | monthly_salary |
+        | --- | -------------- | ------- | -------- | -------------- |
+        | 1   | Elisabeth Grey | History | 3        | 2,500          |
+
+      - Classes
+
+        | id  | grade | teacher_id | number_of_students |
+        | --- | ----- | ---------- | ------------------ |
+        | 1   | 10    | 3          | 21                 |
+
+    - Let’s say you want to find all students that have above-average GPAs. However, you don’t know the average GPA score. Certainly, you can use a query to find out:
+
+      ```
+      SELECT AVG(GPA)
+      FROM students;
+      ```
+
+      - You’ll get a number (3.19) that you can use to solve the initial task – showing all information for students with a GPA above this average:
+
+        ```
+        SELECT *
+        FROM students
+        WHERE GPA > 3.19;
+        ```
+
+      - But can you solve this task in one step? You can with a nested query. Here is how it looks:
+
+        ```
+        SELECT *
+        FROM students
+        WHERE GPA > (
+            SELECT AVG(GPA)
+            FROM students);
+        ```
+
+        - Our subquery here returns a single value (i.e. a table with a single column and a single row). This is important for the comparison operator to work. With the average GPA score returned by the inner query, the outer query can select the students who satisfy our filter condition (i.e. a GPA score above average).
+
+        - And here is the result:
+
+          | id  | name          | class_id | GPA  |
+          | --- | ------------- | -------- | ---- |
+          | 1   | Jack Black    | 3        | 3.45 |
+          | 3   | Kathrine Star | 1        | 3.85 |
+
+- More Examples of Nested SQL Queries
+
+  - First of all, you can put a nested `SELECT` within the `WHERE` clause with comparison operators or the `IN`, `NOT IN`, `ANY`, or `ALL` operators. The second group of operators are used when your subquery returns a list of values (rather than a single value, as in the previous example):
+
+    - The `IN` operator checks if a certain value is `in the table` returned by the subquery.
+    - The `NOT IN` operator filters out the rows corresponding to the values `not present` in that table returned by a subquery.
+    - The `ANY` operator is used with comparison operators to `evaluate if any of the values` returned by the subquery satisfy the condition.
+    - The `ALL` operator is also used with comparison operators to `evaluate if all values` returned by the subquery satisfy the condition.
+
+  - Let’s see how the IN operator works. In this example, you’ll calculate the average number of students in classes where the teacher teaches History or English:
+
+    ```
+    SELECT AVG(number_of_students)
+    FROM classes
+    WHERE teacher_id IN (
+        SELECT id
+        FROM teachers
+        WHERE subject = 'English' OR subject = 'History');
+    ```
+
+    - Here you use a subquery to select only those teacher IDs that correspond to teachers of English or History. Note that our subquery returns a list of values, i.e. a table with one column (id) and multiple rows that satisfy the condition of the inner query.
+
+  - Multiple subqueries in one statement
+
+    - Let’s say you want to show all information about the students in the class with the highest number of students. To answer this question, you’ll need to find the class with the maximal number of students and then define that class. Finally, you’ll need to show information about the students in that class.
+
+      - You can use a subquery within another subquery to answer this question:
+
+        ```
+        SELECT *
+        FROM students
+        WHERE class_id = (
+            SELECT id
+            FROM classes
+            WHERE number_of_students = (
+                SELECT MAX(number_of_students)
+                FROM classes));
+        ```
+
+    - Using subqueries outside of WHERE
+
+      - Let’s find out what subject area corresponds to the highest average teacher salary. You’ll first need to calculate the average salary by subject, then use this table to find the maximum average salary:
+
+        ```
+        SELECT subject, MAX(salary_by_subject.avg_salary) AS max_salary
+        FROM (
+            SELECT subject, AVG(monthly_salary) AS avg_salary
+            FROM teachers
+            GROUP BY subject) salary_by_subject;
+        ```
+
+- Additional Tips on Using Nested SELECTs
+
+  - When using nested queries, `keep these considerations in mind`:
+
+    - Subqueries can return `single values or tables` (with one or many rows and columns).
+    - You can include a subquery:
+      - In the `WHERE` clause, to filter data.
+      - In the `FROM` clause, to specify a new table.
+      - In the `SELECT` clause, to specify a certain column.
+      - In the `HAVING` clause, as a group selector.
+    - Subqueries should always be enclosed in parentheses ().
+    - Different database management systems have certain limitations on the number of subquery levels (e.g. up to 32 levels in SQL Server). However, in practice, you’ll rarely have more than 2-3 levels of nested queries.
+    - Subqueries are often computationally inefficient. Thus, I recommend avoiding nested queries when other options are available (e.g. JOINs).
+
 ### 9.4. Complex Queries
+
+- What is a complex SQL query?
+  - As the name suggests, a complex query has a complex syntax and can comprise multiple parts. A purpose of such a query is to search data based on several parameters. For instance, a complex query can include several joins across tables or have subqueries (a query nested within another query). Besides, you can encounter frequent use of AND and OR clauses within this type of query.
 
 ### 9.5. Nested Queries or Subqueries
 
